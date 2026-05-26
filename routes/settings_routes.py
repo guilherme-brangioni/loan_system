@@ -1,4 +1,12 @@
-from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 
 from enums.user_role import UserRole
 from services.app_setting_service import AppSettingService
@@ -19,7 +27,10 @@ def settings_page():
     """
     Tela de configurações do sistema.
 
-    Restrita ao ADMIN.
+    Etapa 1:
+    - acessível apenas para ADMIN;
+    - salva valores no banco;
+    - ainda não altera serviços críticos.
     """
 
     if request.method == "POST":
@@ -37,7 +48,7 @@ def settings_page():
                     updated_by=updated_by,
                 )
 
-            flash("Configurações atualizadas com sucesso.", "success")
+            flash("Configurações salvas com sucesso.", "success")
 
             return redirect(url_for("settings_bp.settings_page"))
 

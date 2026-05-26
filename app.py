@@ -16,7 +16,7 @@ from routes.excel_routes import excel_bp
 from routes.maintenance_routes import maintenance_bp
 from routes.auth_routes import auth_bp
 from routes.sync_routes import sync_bp
-#from routes.settings_routes import settings_bp
+from routes.settings_routes import settings_bp
 
 
 def create_app(config_override: dict | None = None):
@@ -40,7 +40,7 @@ def create_app(config_override: dict | None = None):
     app.register_blueprint(maintenance_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(sync_bp)
-    #app.register_blueprint(settings_bp)
+    app.register_blueprint(settings_bp)
 
     @app.context_processor
     def inject_current_user():
@@ -84,7 +84,7 @@ def create_app(config_override: dict | None = None):
         admin_only_prefixes = [
             "maintenance_bp.",
             "sync_bp.",
-            #"settings_bp.",
+            "settings_bp.",
         ]
 
         admin_only_endpoints = {

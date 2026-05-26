@@ -6,24 +6,25 @@ from models.app_setting import AppSetting
 
 class AppSettingService:
     """
-    Serviço central de configurações do sistema.
+    Serviço de configurações do sistema.
 
-    Regra:
-    - tenta buscar no banco;
-    - se não existir, usa o valor padrão do config.py;
-    - se a tabela ainda não existir, não quebra o sistema.
+    Etapa 1:
+    - lista configurações permitidas;
+    - salva valores no banco;
+    - mostra se o valor vem do banco ou do config.py;
+    - ainda não altera serviços críticos.
     """
 
     SETTINGS = [
         {
             "key": "APP_BASE_URL",
             "label": "URL base do sistema",
-            "description": "Usada em links de aprovação, QR Code e e-mails.",
+            "description": "Usada futuramente em links de aprovação, QR Code e e-mails.",
         },
         {
             "key": "LOGO_PATH",
             "label": "Caminho da logo",
-            "description": "Imagem usada no cabeçalho do PDF.",
+            "description": "Imagem usada futuramente no cabeçalho do PDF.",
         },
         {
             "key": "EXCEL_INVENTORY_FILE",
@@ -78,10 +79,9 @@ class AppSettingService:
     @staticmethod
     def get(key: str, default: Any = None) -> Any:
         """
-        Retorna configuração do banco.
+        Busca valor no banco.
 
-        Se não existir, estiver vazia ou o banco/tabela ainda não estiver pronto,
-        retorna o valor padrão.
+        Se não existir ou estiver vazio, retorna default.
         """
 
         try:
@@ -101,26 +101,13 @@ class AppSettingService:
             return default
 
     @staticmethod
-    def get_int(key: str, default: int) -> int:
-        """
-        Retorna configuração inteira.
-        """
-
-        value = AppSettingService.get(key, default)
-
-        try:
-            return int(value)
-        except Exception:
-            return default
-
-    @staticmethod
     def set_value(
         key: str,
         value: str,
         updated_by: str = "SISTEMA",
     ) -> AppSetting:
         """
-        Cria ou atualiza uma configuração.
+        Cria ou atualiza uma configuração permitida.
         """
 
         definition = AppSettingService.get_setting_definition(key)
@@ -138,6 +125,7 @@ class AppSettingService:
 
         setting.value = str(value or "").strip()
         setting.updated_by = updated_by
+        setting.description = definition.get("description", "")
 
         db.session.commit()
 
@@ -146,9 +134,9 @@ class AppSettingService:
     @staticmethod
     def list_settings_with_values(app_config) -> list[dict[str, Any]]:
         """
-        Lista configurações permitidas com valor atual.
+        Lista configurações com valor atual.
 
-        Se não existir no banco, mostra valor vindo do config.py.
+        Se não existir no banco, mostra o valor vindo do config.py.
         """
 
         result: list[dict[str, Any]] = []
@@ -156,12 +144,7 @@ class AppSettingService:
         for definition in AppSettingService.SETTINGS:
             key = definition["key"]
 
-            db_setting = None
-
-            try:
-                db_setting = AppSetting.query.filter_by(key=key).first()
-            except Exception:
-                db_setting = None
+            db_setting = AppSetting.query.filter_by(key=key).first()
 
             config_default = app_config.get(key, "")
 

@@ -5,11 +5,11 @@
 <h2>Configurações do sistema</h2>
 
 <p class="hint">
-    Estas configurações ficam salvas no banco de dados e sobrescrevem os valores padrão do config.py.
+    Nesta etapa, as configurações são salvas no banco, mas ainda não alteram automaticamente os serviços críticos.
 </p>
 
 <div class="message warning">
-    Não armazene senhas nesta tela. Senhas SMTP e segredos devem continuar no arquivo .env ou em variáveis de ambiente.
+    Não armazene senhas nesta tela. Senhas SMTP, tokens e segredos devem continuar no arquivo .env ou em variáveis de ambiente.
 </div>
 
 <form method="post" class="form-card">
@@ -29,12 +29,18 @@
         <p class="hint">
             {{ setting.description }}
             <br>
+            Chave: <strong>{{ setting.key }}</strong>
+            |
             Origem atual: <strong>{{ setting.source }}</strong>
+
             {% if setting.updated_by %}
-                | Atualizado por: <strong>{{ setting.updated_by }}</strong>
+                |
+                Atualizado por: <strong>{{ setting.updated_by }}</strong>
             {% endif %}
+
             {% if setting.updated_at %}
-                | Em: {{ setting.updated_at.strftime("%d/%m/%Y %H:%M") }}
+                |
+                Em: {{ setting.updated_at.strftime("%d/%m/%Y %H:%M") }}
             {% endif %}
         </p>
 
