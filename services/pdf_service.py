@@ -174,10 +174,7 @@ class PDFService:
     def _build_header(loan, styles: dict) -> list[Any]:
         elements: list[Any] = []
 
-        logo_path = AppSettingService.get(
-            "LOGO_PATH",
-            current_app.config.get("LOGO_PATH"),
-        )
+        logo_path = PDFService._get_logo_path()
 
         document_title = PDFService._get_document_title(loan)
 
@@ -790,3 +787,19 @@ class PDFService:
         drawing.add(qr_code)
 
         return drawing
+    
+    @staticmethod
+    def _get_logo_path() -> str:
+        """
+        Retorna o caminho da logo usada no PDF.
+
+        Primeiro tenta buscar na tela de Configurações.
+        Se não houver valor salvo no banco, usa o config.py.
+        """
+
+        logo_path = AppSettingService.get(
+            "LOGO_PATH",
+            current_app.config.get("LOGO_PATH", ""),
+        )
+
+        return str(logo_path or "").strip()

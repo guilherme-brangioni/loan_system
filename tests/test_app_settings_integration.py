@@ -1,4 +1,5 @@
 from database.database import db
+
 from models.app_setting import AppSetting
 from models.loan import Loan
 
@@ -40,3 +41,27 @@ def test_pdf_verification_url_uses_app_base_url_from_settings(
         assert verification_url.startswith(
             "http://sistema-teste.local:5000/emprestimos/verificar/"
         )
+
+def test_pdf_logo_path_uses_logo_path_from_settings(
+    app,
+    login_user,
+):
+    """
+    Garante que o PDFService usa LOGO_PATH salvo nas configurações.
+    """
+
+    login_user(role="ADMIN")
+
+    with app.app_context():
+        setting = AppSetting()
+        setting.key = "LOGO_PATH"
+        setting.value = r"C:\logo_teste\logo.png"
+        setting.description = "Caminho da logo"
+        setting.updated_by = "TESTE"
+
+        db.session.add(setting)
+        db.session.commit()
+
+        logo_path = PDFService._get_logo_path()
+
+        assert logo_path == r"C:\logo_teste\logo.png"
