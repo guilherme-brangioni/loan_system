@@ -15,12 +15,21 @@ class BackupService:
     Tipos:
     - backup automático semanal: arquivo único, sobrescreve o anterior;
     - backup manual: arquivos com data/hora, mantém histórico.
+
+    Agora usa configurações salvas em /configuracoes/:
+    - BACKUP_DIR
+    - BACKUP_KEEP_LAST
+    - AUTO_BACKUP_FILENAME
+    - AUTO_BACKUP_INTERVAL_DAYS
     """
 
     @staticmethod
     def get_database_path() -> str:
         """
         Obtém o caminho real do banco SQLite.
+
+        Este caminho continua vindo do config.py / DATABASE_URL.
+        Não deve ser alterado pela tela de configurações.
         """
 
         database_uri = current_app.config["SQLALCHEMY_DATABASE_URI"]
@@ -36,20 +45,82 @@ class BackupService:
 
     @staticmethod
     def _get_backup_dir() -> str:
+        """
+        Retorna a pasta de backup.
+
+        Prioridade:
+        1. Valor salvo no banco em BACKUP_DIR;
+        2. Valor padrão do config.py.
+        """
+
         backup_dir = AppSettingService.get(
             "BACKUP_DIR",
             current_app.config["BACKUP_DIR"],
         )
 
+        backup_dir = str(backup_dir or "").strip()
+
+        if not backup_dir:
+            backup_dir = current_app.config["BACKUP_DIR"]
+
         os.makedirs(backup_dir, exist_ok=True)
+
         return backup_dir
+
+    @staticmethod
+    def _get_keep_last_manual_backups() -> int:
+        """
+        Quantidade de backups manuais a manter.
+        """
+
+        return AppSettingService.get_int(
+            "BACKUP_KEEP_LAST",
+            int(current_app.config.get("BACKUP_KEEP_LAST", 20)),
+        )
+
+    @staticmethod
+    def _get_auto_backup_filename() -> str:
+        """
+        Nome do arquivo fixo do backup automático.
+        """
+
+        filename = AppSettingService.get(
+            "AUTO_BACKUP_FILENAME",
+            current_app.config["AUTO_BACKUP_FILENAME"],
+        )
+
+        filename = str(filename or "").strip()
+
+        if not filename:
+            filename = current_app.config["AUTO_BACKUP_FILENAME"]
+
+        if not filename.endswith(".db"):
+            filename += ".db"
+
+        return filename
+
+    @staticmethod
+    def _get_auto_backup_interval_days() -> int:
+        """
+        Intervalo em dias do backup automático.
+        """
+
+        interval_days = AppSettingService.get_int(
+            "AUTO_BACKUP_INTERVAL_DAYS",
+            int(current_app.config.get("AUTO_BACKUP_INTERVAL_DAYS", 7)),
+        )
+
+        if interval_days < 1:
+            interval_days = 7
+
+        return interval_days
 
     @staticmethod
     def create_backup() -> dict:
         """
         Cria backup manual com data/hora no nome.
 
-        Esse método continua sendo usado pelo botão manual.
+        Esse método é usado pelo botão manual em Manutenção.
         """
 
         database_path = BackupService.get_database_path()
@@ -85,13 +156,13 @@ class BackupService:
     @staticmethod
     def create_weekly_automatic_backup_if_needed() -> dict:
         """
-        Cria backup automático semanal.
+        Cria backup automático.
 
         Regra:
         - usa sempre o mesmo arquivo;
         - se não existir, cria;
-        - se existir e tiver menos de 7 dias, não faz nada;
-        - se existir e tiver 7 dias ou mais, sobrescreve.
+        - se existir e ainda estiver dentro do intervalo, não faz nada;
+        - se existir e já passou do intervalo, sobrescreve.
         """
 
         database_path = BackupService.get_database_path()
@@ -103,20 +174,14 @@ class BackupService:
 
         backup_dir = BackupService._get_backup_dir()
 
-        auto_filename = AppSettingService.get(
-            "AUTO_BACKUP_FILENAME",
-            current_app.config["AUTO_BACKUP_FILENAME"],
-        )
+        auto_filename = BackupService._get_auto_backup_filename()
 
         auto_backup_path = os.path.join(
             backup_dir,
             auto_filename,
         )
 
-        interval_days = AppSettingService.get_int(
-            "AUTO_BACKUP_INTERVAL_DAYS",
-            int(current_app.config.get("AUTO_BACKUP_INTERVAL_DAYS", 7)),
-        )
+        interval_days = BackupService._get_auto_backup_interval_days()
 
         if os.path.exists(auto_backup_path):
             last_modified = datetime.fromtimestamp(
@@ -128,7 +193,7 @@ class BackupService:
             if datetime.now() < next_backup_date:
                 return {
                     "created": False,
-                    "reason": "Backup automático semanal ainda está atualizado.",
+                    "reason": "Backup automático ainda está atualizado.",
                     "filename": auto_filename,
                     "path": auto_backup_path,
                     "last_backup_at": last_modified,
@@ -149,15 +214,12 @@ class BackupService:
     @staticmethod
     def get_automatic_backup() -> dict | None:
         """
-        Retorna o backup automático semanal, se existir.
+        Retorna o backup automático, se existir.
         """
 
         backup_dir = BackupService._get_backup_dir()
 
-        auto_filename = AppSettingService.get(
-            "AUTO_BACKUP_FILENAME",
-            current_app.config["AUTO_BACKUP_FILENAME"],
-        )
+        auto_filename = BackupService._get_auto_backup_filename()
 
         path = os.path.join(
             backup_dir,
@@ -171,10 +233,7 @@ class BackupService:
             os.path.getmtime(path)
         )
 
-        interval_days = AppSettingService.get_int(
-            "AUTO_BACKUP_INTERVAL_DAYS",
-            int(current_app.config.get("AUTO_BACKUP_INTERVAL_DAYS", 7)),
-        )
+        interval_days = BackupService._get_auto_backup_interval_days()
 
         return {
             "type": "AUTOMATICO",
@@ -189,14 +248,13 @@ class BackupService:
     def list_manual_backups() -> List[dict]:
         """
         Lista somente backups manuais.
+
+        O backup automático não aparece nesta lista.
         """
 
         backup_dir = BackupService._get_backup_dir()
 
-        auto_filename = AppSettingService.get(
-            "AUTO_BACKUP_FILENAME",
-            current_app.config["AUTO_BACKUP_FILENAME"],
-        )
+        auto_filename = BackupService._get_auto_backup_filename()
 
         backups = []
 
@@ -236,10 +294,7 @@ class BackupService:
         O backup automático não entra nessa limpeza.
         """
 
-        keep_last = AppSettingService.get_int(
-            "BACKUP_KEEP_LAST",
-            int(current_app.config.get("BACKUP_KEEP_LAST", 20)),
-        )
+        keep_last = BackupService._get_keep_last_manual_backups()
 
         backups = BackupService.list_manual_backups()
 
@@ -268,7 +323,7 @@ class BackupService:
             raise FileNotFoundError("Backup não encontrado.")
 
         valid_files = [
-            current_app.config["AUTO_BACKUP_FILENAME"],
+            BackupService._get_auto_backup_filename(),
         ]
 
         valid_files.extend(

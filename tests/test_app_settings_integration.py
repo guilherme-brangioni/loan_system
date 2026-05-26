@@ -1,9 +1,13 @@
+import os
+
 from database.database import db
 
 from models.app_setting import AppSetting
 from models.loan import Loan
 
 from services.pdf_service import PDFService
+from services.backup_service import BackupService
+
 from tests.test_pdf_and_verification import create_test_loan_with_item
 
 
@@ -65,3 +69,134 @@ def test_pdf_logo_path_uses_logo_path_from_settings(
         logo_path = PDFService._get_logo_path()
 
         assert logo_path == r"C:\logo_teste\logo.png"
+
+
+
+
+
+
+def test_backup_dir_uses_setting_value(
+    app,
+    login_user,
+):
+    """
+    Garante que BackupService usa BACKUP_DIR salvo nas configurações.
+    """
+
+    login_user(role="ADMIN")
+
+    custom_backup_dir = os.path.join(
+        app.config["BACKUP_DIR"],
+        "custom_backups",
+    )
+
+    with app.app_context():
+        setting = AppSetting()
+        setting.key = "BACKUP_DIR"
+        setting.value = custom_backup_dir
+        setting.description = "Pasta de backups"
+        setting.updated_by = "TESTE"
+
+        db.session.add(setting)
+        db.session.commit()
+
+        backup = BackupService.create_backup()
+
+        assert backup["type"] == "MANUAL"
+        assert backup["path"].startswith(custom_backup_dir)
+        assert os.path.exists(backup["path"])
+
+
+def test_auto_backup_filename_uses_setting_value(
+    app,
+    login_user,
+):
+    """
+    Garante que BackupService usa AUTO_BACKUP_FILENAME salvo nas configurações.
+    """
+
+    login_user(role="ADMIN")
+
+    with app.app_context():
+        setting = AppSetting()
+        setting.key = "AUTO_BACKUP_FILENAME"
+        setting.value = "backup_auto_teste.db"
+        setting.description = "Nome do backup automático"
+        setting.updated_by = "TESTE"
+
+        db.session.add(setting)
+        db.session.commit()
+
+        result = BackupService.create_weekly_automatic_backup_if_needed()
+
+        assert result["filename"] == "backup_auto_teste.db"
+        assert os.path.exists(result["path"])
+
+
+def test_auto_backup_interval_uses_setting_value(
+    app,
+    login_user,
+):
+    """
+    Garante que BackupService usa AUTO_BACKUP_INTERVAL_DAYS salvo nas configurações.
+    """
+
+    login_user(role="ADMIN")
+
+    with app.app_context():
+        setting = AppSetting()
+        setting.key = "AUTO_BACKUP_INTERVAL_DAYS"
+        setting.value = "3"
+        setting.description = "Intervalo do backup automático"
+        setting.updated_by = "TESTE"
+
+        db.session.add(setting)
+        db.session.commit()
+
+        # O login pode ter passado pelo Dashboard e criado backup automático
+        # antes da configuração do teste. Removemos para testar criação limpa.
+        existing_backup = BackupService.get_automatic_backup()
+
+        if existing_backup and os.path.exists(existing_backup["path"]):
+            os.remove(existing_backup["path"])
+
+        result = BackupService.create_weekly_automatic_backup_if_needed()
+
+        assert result["created"] is True
+
+        automatic_backup = BackupService.get_automatic_backup()
+
+        assert automatic_backup is not None
+
+        delta = automatic_backup["next_backup_at"] - automatic_backup["created_at"]
+
+        assert delta.days == 3
+
+
+def test_backup_keep_last_uses_setting_value(
+    app,
+    login_user,
+):
+    """
+    Garante que BACKUP_KEEP_LAST limita backups manuais.
+    """
+
+    login_user(role="ADMIN")
+
+    with app.app_context():
+        setting = AppSetting()
+        setting.key = "BACKUP_KEEP_LAST"
+        setting.value = "2"
+        setting.description = "Quantidade de backups manuais"
+        setting.updated_by = "TESTE"
+
+        db.session.add(setting)
+        db.session.commit()
+
+        BackupService.create_backup()
+        BackupService.create_backup()
+        BackupService.create_backup()
+
+        manual_backups = BackupService.list_manual_backups()
+
+        assert len(manual_backups) <= 2
