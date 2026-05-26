@@ -99,6 +99,21 @@ class AppSettingService:
 
         except Exception:
             return default
+        
+    @staticmethod
+    def get_int(key: str, default: int) -> int:
+        """
+        Busca uma configuração e tenta converter para inteiro.
+
+        Se não existir, estiver vazia ou inválida, retorna o valor padrão.
+        """
+
+        value = AppSettingService.get(key, default)
+
+        try:
+            return int(value)
+        except Exception:
+            return default
 
     @staticmethod
     def set_value(
