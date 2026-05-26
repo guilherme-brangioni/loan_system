@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Diagnóstico do sistema</h2>
+
+<p class="hint">
+    Esta tela verifica configurações, caminhos e permissões básicas.
+    Nenhum dado é alterado durante o diagnóstico.
+</p>
+
+<section class="cards">
+    <div class="card">
+        <strong>{{ summary.ok }}</strong>
+        <span>Itens OK</span>
+    </div>
+
+    <div class="card warning">
+        <strong>{{ summary.warning }}</strong>
+        <span>Avisos</span>
+    </div>
+
+    <div class="card danger">
+        <strong>{{ summary.error }}</strong>
+        <span>Erros</span>
+    </div>
+</section>
+
+<table>
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Status</th>
+            <th>Mensagem</th>
+            <th>Valor</th>
+            <th>Detalhes</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for check in checks %}
+        <tr>
+            <td>
+                <strong>{{ check.name }}</strong>
+            </td>
+
+            <td>
+                {% if check.status == "OK" %}
+                    <span class="badge success">OK</span>
+                {% elif check.status == "AVISO" %}
+                    <span class="badge warning">AVISO</span>
+                {% else %}
+                    <span class="badge danger">ERRO</span>
+                {% endif %}
+            </td>
+
+            <td>{{ check.message }}</td>
+
+            <td>
+                <small>{{ check.value or "-" }}</small>
+            </td>
+
+            <td>
+                <small>{{ check.details or "-" }}</small>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p>
+    <a class="button secondary" href="{{ url_for('settings_bp.settings_page') }}">
+        Abrir configurações
+    </a>
+
+    <a class="button secondary" href="{{ url_for('maintenance_bp.maintenance_page') }}">
+        Abrir manutenção
+    </a>
+</p>
+
+{% endblock %}

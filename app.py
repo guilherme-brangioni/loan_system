@@ -17,6 +17,7 @@ from routes.maintenance_routes import maintenance_bp
 from routes.auth_routes import auth_bp
 from routes.sync_routes import sync_bp
 from routes.settings_routes import settings_bp
+from routes.diagnostic_routes import diagnostic_bp
 
 
 def create_app(config_override: dict | None = None):
@@ -41,6 +42,7 @@ def create_app(config_override: dict | None = None):
     app.register_blueprint(auth_bp)
     app.register_blueprint(sync_bp)
     app.register_blueprint(settings_bp)
+    app.register_blueprint(diagnostic_bp)
 
     @app.context_processor
     def inject_current_user():
@@ -85,6 +87,7 @@ def create_app(config_override: dict | None = None):
             "maintenance_bp.",
             "sync_bp.",
             "settings_bp.",
+            "diagnostic_bp.",
         ]
 
         admin_only_endpoints = {

@@ -1,5 +1,4 @@
 import os
-
 from database.database import db
 
 from models.app_setting import AppSetting
