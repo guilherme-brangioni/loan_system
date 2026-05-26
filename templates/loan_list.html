@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Empréstimos</h2>
+
+<form method="get" action="{{ url_for('loan_bp.list_loans') }}" class="search-form">
+    <label for="q">Buscar empréstimo</label>
+
+    <div class="search-row">
+        <input
+            type="text"
+            id="q"
+            name="q"
+            value="{{ search_text or '' }}"
+            placeholder="Controle, solicitante, matrícula, equipamento, série, código..."
+        >
+
+        <select name="status">
+            <option value="">Todos os status</option>
+            {% for status in status_options %}
+                <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>
+                    {{ status }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="validacao">
+            <option value="">Validação</option>
+            <option value="PENDENTE" {% if validation_filter == "PENDENTE" %}selected{% endif %}>
+                Pendentes
+            </option>
+            <option value="VALIDADO" {% if validation_filter == "VALIDADO" %}selected{% endif %}>
+                Validados
+            </option>
+        </select>
+
+        <select name="atrasados">
+            <option value="">Atraso</option>
+            <option value="SIM" {% if overdue_filter == "SIM" %}selected{% endif %}>
+                Somente atrasados
+            </option>
+        </select>
+
+        <input
+            type="date"
+            name="data_inicio"
+            value="{{ date_from_text or '' }}"
+        >
+
+        <input
+            type="date"
+            name="data_fim"
+            value="{{ date_to_text or '' }}"
+        >
+
+        <select name="per_page">
+            <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+            <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+        </select>
+
+        <button type="submit">Filtrar</button>
+
+        <a class="button secondary" href="{{ url_for('loan_bp.list_loans') }}">
+            Limpar
+        </a>
+    </div>
+</form>
+
+<p class="hint">
+    Total encontrado: <strong>{{ pagination.total }}</strong>
+    | Página {{ pagination.page }} de {{ pagination.pages }}
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Controle</th>
+            <th>Solicitante</th>
+            <th>Equipamento(s)</th>
+            <th>Validação</th>
+            <th>Status</th>
+            <th>Data empréstimo</th>
+            <th>Previsão devolução</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for loan in loans %}
+        {% set ns = namespace(has_pending_validation=false) %}
+
+        {% for item in loan.items %}
+            {% if item.equipment and not item.equipment.validado %}
+                {% set ns.has_pending_validation = true %}
+            {% endif %}
+        {% endfor %}
+
+        <tr>
+            <td>
+                <strong>{{ loan.numero_controle }}</strong>
+            </td>
+
+            <td>
+                {{ loan.user.nome }}
+                <br>
+                <small>Matrícula: {{ loan.user.matricula }}</small>
+            </td>
+
+            <td>
+                {% if loan.items %}
+                    {% for item in loan.items %}
+                        {% if item.equipment %}
+                            <div class="loan-equipment-summary">
+                                <strong>{{ item.equipment.tipo_equipamento or "EQUIPAMENTO" }}</strong>
+                                <br>
+
+                                {{ item.equipment.fabricante or "-" }}
+                                {{ item.equipment.modelo or "-" }}
+                                <br>
+
+                                <small>
+                                    Patrimônio:
+                                    {{ item.equipment.patrimonio or "-" }}
+                                    |
+                                    Cód. Equip.:
+                                    {{ item.equipment.codigo_equipamento or "-" }}
+                                    |
+                                    Série:
+                                    {{ item.equipment.serial or "-" }}
+                                </small>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span>-</span>
+                {% endif %}
+            </td>
+
+            <td>
+                {% if ns.has_pending_validation and loan.status not in ["FINALIZADO", "REJEITADO", "CANCELADO"] %}
+                    <form
+                        method="post"
+                        action="{{ url_for('loan_bp.validate_loan_equipments', loan_id=loan.id) }}"
+                        onsubmit="return confirm('Confirmar validação dos equipamentos deste empréstimo?');"
+                    >
+                        <button type="submit">
+                            Validar
+                        </button>
+                    </form>
+                {% else %}
+                    Validado
+                {% endif %}
+            </td>
+
+            <td>{{ loan.status }}</td>
+
+            <td>
+                {{ loan.data_emprestimo.strftime("%d/%m/%Y") if loan.data_emprestimo else "-" }}
+            </td>
+
+            <td>
+                {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+            </td>
+
+            <td>
+                <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                    Abrir
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="pagination">
+    {% if pagination.has_prev %}
+        <a
+            class="button secondary"
+            href="{{ url_for(
+                'loan_bp.list_loans',
+                q=search_text,
+                status=status_filter,
+                validacao=validation_filter,
+                atrasados=overdue_filter,
+                data_inicio=date_from_text,
+                data_fim=date_to_text,
+                per_page=per_page,
+                page=pagination.prev_num
+            ) }}"
+        >
+            Anterior
+        </a>
+    {% endif %}
+
+    {% if pagination.has_next %}
+        <a
+            class="button secondary"
+            href="{{ url_for(
+                'loan_bp.list_loans',
+                q=search_text,
+                status=status_filter,
+                validacao=validation_filter,
+                atrasados=overdue_filter,
+                data_inicio=date_from_text,
+                data_fim=date_to_text,
+                per_page=per_page,
+                page=pagination.next_num
+            ) }}"
+        >
+            Próxima
+        </a>
+    {% endif %}
+</div>
+
+{% endblock %}

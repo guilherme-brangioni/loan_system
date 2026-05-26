@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Editar equipamento</h2>
+
+<form method="post" class="form-card">
+
+    <p>
+        <strong>Código interno:</strong>
+        {{ equipment.codigo_interno }}
+    </p>
+
+    <label for="fabricante">Fabricante *</label>
+    <input
+        type="text"
+        id="fabricante"
+        name="fabricante"
+        value="{{ equipment.fabricante or '' }}"
+        required
+    >
+
+    <label for="modelo">Modelo *</label>
+    <input
+        type="text"
+        id="modelo"
+        name="modelo"
+        value="{{ equipment.modelo or '' }}"
+        required
+    >
+
+    <label for="tipo_equipamento">Tipo de equipamento *</label>
+    <input
+        type="text"
+        id="tipo_equipamento"
+        name="tipo_equipamento"
+        value="{{ equipment.tipo_equipamento or '' }}"
+        required
+    >
+
+    <label for="patrimonio">Patrimônio *</label>
+    <input
+        type="text"
+        id="patrimonio"
+        name="patrimonio"
+        value="{{ equipment.patrimonio or 'N/A' }}"
+        required
+    >
+
+    <label for="codigo_equipamento">Código do equipamento</label>
+    <input
+        type="text"
+        id="codigo_equipamento"
+        name="codigo_equipamento"
+        value="{{ equipment.codigo_equipamento or '' }}"
+    >
+
+    <label for="serial">Número de série</label>
+    <input
+        type="text"
+        id="serial"
+        name="serial"
+        value="{{ equipment.serial or '' }}"
+    >
+
+    <label for="categoria">Categoria</label>
+    <input
+        type="text"
+        id="categoria"
+        name="categoria"
+        value="{{ equipment.categoria or '' }}"
+    >
+
+    <label for="regional">Regional</label>
+    <input
+        type="text"
+        id="regional"
+        name="regional"
+        value="{{ equipment.regional or '' }}"
+    >
+
+    <label for="local_armazenagem">Local de armazenagem</label>
+    <input
+        type="text"
+        id="local_armazenagem"
+        name="local_armazenagem"
+        value="{{ equipment.local_armazenagem or '' }}"
+    >
+
+    <label for="subestacao_origem">Subestação de origem</label>
+    <input
+        type="text"
+        id="subestacao_origem"
+        name="subestacao_origem"
+        value="{{ equipment.subestacao_origem or '' }}"
+    >
+
+    <label for="status">Status operacional</label>
+    <select id="status" name="status" required>
+        {% for status in status_options %}
+            <option
+                value="{{ status }}"
+                {% if equipment.status == status %}selected{% endif %}
+            >
+                {{ status }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label>
+        <input
+            type="checkbox"
+            name="validado"
+            {% if equipment.validado %}checked{% endif %}
+        >
+        Equipamento validado
+    </label>
+
+    <label for="observacoes">Observações</label>
+    <textarea
+        id="observacoes"
+        name="observacoes"
+        rows="4"
+    >{{ equipment.observacoes or '' }}</textarea>
+
+    <button type="submit">Salvar alterações</button>
+
+</form>
+
+{% endblock %}

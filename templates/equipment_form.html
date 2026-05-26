@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Cadastrar equipamento/material</h2>
+
+<form method="post" class="form-card">
+
+    <label for="fabricante">Fabricante *</label>
+    <input
+        type="text"
+        id="fabricante"
+        name="fabricante"
+        required
+        placeholder="Ex.: Dell, HP, Epson, Fluke"
+    >
+
+    <label for="modelo">Modelo *</label>
+    <input
+        type="text"
+        id="modelo"
+        name="modelo"
+        required
+        placeholder="Ex.: Latitude 5420, PowerLite X49"
+    >
+
+    <label for="tipo_equipamento">Tipo de equipamento *</label>
+    <input
+        type="text"
+        id="tipo_equipamento"
+        name="tipo_equipamento"
+        required
+        placeholder="Ex.: Notebook, Projetor, Alicate, Cabo"
+    >
+
+    <label for="patrimonio">Patrimônio *</label>
+    <input
+        type="text"
+        id="patrimonio"
+        name="patrimonio"
+        required
+        placeholder="Informe o patrimônio ou N/A"
+    >
+
+    <label for="codigo_equipamento">Código do equipamento</label>
+    <input
+        type="text"
+        id="codigo_equipamento"
+        name="codigo_equipamento"
+        placeholder="Código vindo da planilha ou controle interno externo"
+    >
+
+    <label for="serial">Número de série</label>
+    <input
+        type="text"
+        id="serial"
+        name="serial"
+        placeholder="Número de série, se houver"
+    >
+
+    <label for="categoria">Categoria</label>
+    <input
+        type="text"
+        id="categoria"
+        name="categoria"
+        placeholder="Ex.: Informática, Ferramenta, Medição"
+    >
+
+    <label for="observacoes">Observações</label>
+    <textarea
+        id="observacoes"
+        name="observacoes"
+        rows="4"
+    ></textarea>
+
+    <button type="submit">Salvar</button>
+
+</form>
+
+<p class="hint">
+    O campo patrimônio é obrigatório. Quando o item não tiver patrimônio, informe <strong>N/A</strong>.
+    Se o patrimônio for <strong>N/A</strong>, informe pelo menos o número de série ou o código do equipamento.
+</p>
+
+{% endblock %}

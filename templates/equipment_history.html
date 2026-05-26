@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Histórico do equipamento</h2>
+
+<section class="detail-grid">
+    <div>
+        <h3>Identificação</h3>
+        <p><strong>Código interno:</strong> {{ equipment.codigo_interno }}</p>
+        <p><strong>Tipo:</strong> {{ equipment.tipo_equipamento or "-" }}</p>
+        <p><strong>Fabricante:</strong> {{ equipment.fabricante or "-" }}</p>
+        <p><strong>Modelo:</strong> {{ equipment.modelo or "-" }}</p>
+    </div>
+
+    <div>
+        <h3>Rastreabilidade</h3>
+        <p><strong>Patrimônio:</strong> {{ equipment.patrimonio or "-" }}</p>
+        <p><strong>Código do equipamento:</strong> {{ equipment.codigo_equipamento or "-" }}</p>
+        <p><strong>Número de série:</strong> {{ equipment.serial or "-" }}</p>
+        <p><strong>Status:</strong> {{ equipment.status }}</p>
+    </div>
+
+    <div>
+        <h3>Origem / Localização</h3>
+        <p><strong>Regional:</strong> {{ equipment.regional or "-" }}</p>
+        <p><strong>Local:</strong> {{ equipment.local_armazenagem or "-" }}</p>
+        <p><strong>Subestação:</strong> {{ equipment.subestacao_origem or "-" }}</p>
+        <p><strong>Validado:</strong> {{ "Sim" if equipment.validado else "Não" }}</p>
+    </div>
+</section>
+
+<h3>Histórico de empréstimos</h3>
+
+{% if loan_items %}
+<table>
+    <thead>
+        <tr>
+            <th>Controle</th>
+            <th>Solicitante</th>
+            <th>Status empréstimo</th>
+            <th>Status item</th>
+            <th>Data empréstimo</th>
+            <th>Previsão devolução</th>
+            <th>Devolvido em</th>
+            <th>Devolvido por</th>
+            <th>Imagem</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in loan_items %}
+            {% set loan = item.loan %}
+            <tr>
+                <td>
+                    <strong>{{ loan.numero_controle }}</strong>
+                </td>
+
+                <td>
+                    {{ loan.user.nome if loan.user else "-" }}
+                    <br>
+                    <small>{{ loan.user.matricula if loan.user else "-" }}</small>
+                </td>
+
+                <td>{{ loan.status }}</td>
+
+                <td>{{ item.status }}</td>
+
+                <td>
+                    {{ loan.data_emprestimo.strftime("%d/%m/%Y") if loan.data_emprestimo else "-" }}
+                </td>
+
+                <td>
+                    {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+                </td>
+
+                <td>
+                    {{ item.devolvido_em.strftime("%d/%m/%Y %H:%M") if item.devolvido_em else "-" }}
+                </td>
+
+                <td>
+                    {{ item.devolvido_por or "-" }}
+                </td>
+
+                <td>
+                    {{ "Sim" if item.image_path else "Não" }}
+                </td>
+
+                <td>
+                    <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                        Abrir empréstimo
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum histórico de empréstimo encontrado para este equipamento.</p>
+{% endif %}
+
+<p>
+    <a class="button secondary" href="{{ url_for('equipment_bp.list_items') }}">
+        Voltar para itens
+    </a>
+
+    <a class="button" href="{{ url_for('equipment_bp.edit_item', equipment_id=equipment.id) }}">
+        Editar equipamento
+    </a>
+</p>
+
+{% endblock %}

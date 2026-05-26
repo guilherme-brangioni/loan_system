@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Validação de itens auto-cadastrados</h2>
+
+<p class="hint">
+    Itens criados automaticamente durante um empréstimo aparecem aqui para conferência.
+    Após validar, eles deixam de aparecer nesta tela.
+</p>
+
+<h3>Equipamentos patrimoniais pendentes</h3>
+
+{% if pending_equipments %}
+<table>
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Patrimônio</th>
+            <th>Categoria</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in pending_equipments %}
+        <tr>
+            <td>{{ item.codigo_interno }}</td>
+            <td>{{ item.nome }}</td>
+            <td>{{ item.patrimonio or "-" }}</td>
+            <td>{{ item.categoria or "-" }}</td>
+            <td>{{ item.status }}</td>
+            <td>
+                <a href="{{ url_for('validation_bp.validate_equipment', equipment_id=item.id) }}">
+                    Validar
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum equipamento patrimonial pendente de validação.</p>
+{% endif %}
+
+<h3>Consumíveis pendentes</h3>
+
+{% if pending_consumables %}
+<table>
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Nome</th>
+            <th>Categoria</th>
+            <th>Quantidade</th>
+            <th>Limite alerta</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in pending_consumables %}
+        <tr>
+            <td>{{ item.codigo_interno }}</td>
+            <td>{{ item.nome }}</td>
+            <td>{{ item.categoria or "-" }}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>{{ item.limite_alerta }}</td>
+            <td>
+                <a href="{{ url_for('validation_bp.validate_consumable', consumable_id=item.id) }}">
+                    Validar
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum consumível pendente de validação.</p>
+{% endif %}
+
+{% endblock %}

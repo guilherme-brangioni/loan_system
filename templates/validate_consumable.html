@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Validar consumível</h2>
+
+<form method="post" class="form-card">
+
+    <p>
+        <strong>Código interno:</strong>
+        {{ consumable.codigo_interno }}
+    </p>
+
+    <label for="nome">Nome *</label>
+    <input
+        type="text"
+        id="nome"
+        name="nome"
+        value="{{ consumable.nome }}"
+        required
+    >
+
+    <label for="categoria">Categoria</label>
+    <input
+        type="text"
+        id="categoria"
+        name="categoria"
+        value="{{ consumable.categoria or '' }}"
+    >
+
+    <label for="quantidade">Quantidade atual</label>
+    <input
+        type="number"
+        id="quantidade"
+        name="quantidade"
+        value="{{ consumable.quantidade }}"
+        min="0"
+    >
+
+    <label for="limite_alerta">Limite de alerta</label>
+    <input
+        type="number"
+        id="limite_alerta"
+        name="limite_alerta"
+        value="{{ consumable.limite_alerta }}"
+        min="0"
+    >
+
+    <label for="observacoes">Observações</label>
+    <textarea
+        id="observacoes"
+        name="observacoes"
+        rows="4"
+    >{{ consumable.observacoes or '' }}</textarea>
+
+    <label for="validated_by">Validado por</label>
+    <input
+        type="text"
+        id="validated_by"
+        name="validated_by"
+        placeholder="Seu nome ou matrícula"
+    >
+
+    <button type="submit">Marcar como validado</button>
+
+</form>
+
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Revisão de solicitação de empréstimo</h2>
+
+<section class="detail-grid">
+    <div>
+        <h3>Número de controle</h3>
+        <p>{{ loan.numero_controle }}</p>
+    </div>
+
+    <div>
+        <h3>Status</h3>
+        <p>{{ loan.status }}</p>
+    </div>
+
+    <div>
+        <h3>Solicitante</h3>
+        <p>{{ loan.user.nome }}</p>
+        <p>Matrícula: {{ loan.user.matricula }}</p>
+        <p>E-mail: {{ loan.user.email }}</p>
+    </div>
+
+    <div>
+        <h3>Área</h3>
+        <p>Gerência: {{ loan.user.gerencia or "-" }}</p>
+        <p>Regional: {{ loan.user.regional or "-" }}</p>
+        <p>Equipe: {{ loan.user.equipe or "-" }}</p>
+    </div>
+
+    <div>
+        <h3>Responsável pela entrega</h3>
+        <p>{{ loan.responsavel_entrega_nome }}</p>
+        <p>{{ loan.responsavel_entrega_matricula or "-" }}</p>
+    </div>
+
+    <div>
+        <h3>Prazo</h3>
+        <p>Data de empréstimo: {{ loan.data_emprestimo.strftime("%d/%m/%Y") }}</p>
+        <p>Devolução prevista: {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") }}</p>
+    </div>
+</section>
+
+<h3>Itens solicitados</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Fabricante</th>
+            <th>Modelo</th>
+            <th>Patrimônio</th>
+            <th>Serial</th>
+            <th>Código interno</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in loan.items %}
+            {% if item.equipment %}
+            <tr>
+                <td>{{ item.equipment.tipo_equipamento or "-" }}</td>
+                <td>{{ item.equipment.fabricante or "-" }}</td>
+                <td>{{ item.equipment.modelo or "-" }}</td>
+                <td>{{ item.equipment.patrimonio or "-" }}</td>
+                <td>{{ item.equipment.serial or "-" }}</td>
+                <td>{{ item.equipment.codigo_interno }}</td>
+                <td>{{ item.equipment.status }}</td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if loan.status == "PENDENTE_APROVACAO" %}
+<section class="actions">
+
+    <form method="post" action="{{ url_for('loan_bp.approve_loan', token=token) }}">
+        <button type="submit">Aprovar solicitação</button>
+    </form>
+
+    <form method="post" action="{{ url_for('loan_bp.reject_loan', token=token) }}" class="form-card">
+        <label for="reason">Motivo da rejeição</label>
+        <textarea
+            id="reason"
+            name="reason"
+            rows="3"
+            placeholder="Informe o motivo, se desejar"
+        ></textarea>
+
+        <button type="submit" class="danger-button">
+            Rejeitar solicitação
+        </button>
+    </form>
+
+</section>
+{% else %}
+<p class="hint">
+    Esta solicitação não está mais pendente de aprovação.
+    Status atual: <strong>{{ loan.status }}</strong>
+</p>
+{% endif %}
+
+{% endblock %}

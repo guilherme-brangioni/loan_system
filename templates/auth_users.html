@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Usuários do sistema</h2>
+
+<p>
+    <a class="button" href="{{ url_for('auth_bp.new_user') }}">
+        Novo usuário
+    </a>
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Perfil</th>
+            <th>Ativo</th>
+            <th>Último login</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.nome }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td>{{ "Sim" if user.active else "Não" }}</td>
+            <td>
+                {{ user.last_login_at.strftime("%d/%m/%Y %H:%M") if user.last_login_at else "-" }}
+            </td>
+            <td>
+                <a href="{{ url_for('auth_bp.edit_user', user_id=user.id) }}">
+                    Editar
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

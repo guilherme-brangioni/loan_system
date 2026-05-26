@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Integração com Excel</h2>
+
+<p class="hint">
+    Esta tela sincroniza os equipamentos da planilha de inventário em rede
+    com o banco de dados local do sistema.
+</p>
+
+<section class="detail-grid">
+
+    <div>
+        <h3>Arquivo configurado</h3>
+        <p>{{ excel_file }}</p>
+    </div>
+
+    <div>
+        <h3>Aba configurada</h3>
+        <p>{{ excel_sheet }}</p>
+    </div>
+
+</section>
+
+<h3>Colunas esperadas</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Ordem</th>
+            <th>Coluna</th>
+            <th>Uso no sistema</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Regional</td>
+            <td>Regional do equipamento</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Data do Inventário</td>
+            <td>Data registrada na planilha</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Descrição do Equipamento</td>
+            <td>Tipo do equipamento</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Modelo do Equipamento</td>
+            <td>Modelo</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Fabricante</td>
+            <td>Fabricante</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>Código do Equipamento</td>
+            <td>Código externo vindo da planilha</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>Número de Série</td>
+            <td>Identificador principal quando existir</td>
+        </tr>
+        <tr>
+            <td>8</td>
+            <td>Status</td>
+            <td>Status informativo da planilha</td>
+        </tr>
+        <tr>
+            <td>9</td>
+            <td>Local de Armazenagem</td>
+            <td>Local físico informado na planilha</td>
+        </tr>
+        <tr>
+            <td>10</td>
+            <td>Subestação de Origem</td>
+            <td>Origem do equipamento</td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td>Observação</td>
+            <td>Observações gerais</td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td>Emprestado para</td>
+            <td>Informação histórica da planilha</td>
+        </tr>
+        <tr>
+            <td>13</td>
+            <td>Data de empréstimo</td>
+            <td>Data histórica da planilha</td>
+        </tr>
+    </tbody>
+</table>
+
+<form
+    method="post"
+    action="{{ url_for('excel_bp.sync_inventory') }}"
+    onsubmit="return confirm('Deseja sincronizar a planilha agora?');"
+>
+    <button type="submit">
+        Sincronizar inventário da planilha
+    </button>
+</form>
+
+<p class="hint">
+    A sincronização não apaga equipamentos existentes no banco.
+    Ela apenas cria novos registros ou atualiza equipamentos encontrados pelo
+    Número de Série ou pelo Código do Equipamento.
+</p>
+
+{% endblock %}

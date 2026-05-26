@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Logs de e-mail</h2>
+
+<p class="hint">
+    Aqui ficam registradas as tentativas de envio.
+    Use esta tela para diagnosticar falhas de SMTP.
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Tipo</th>
+            <th>Empréstimo</th>
+            <th>Destinatários</th>
+            <th>Assunto</th>
+            <th>Sucesso</th>
+            <th>Erro</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+            <td>{{ log.email_type }}</td>
+            <td>{{ log.loan_id or "-" }}</td>
+            <td><pre>{{ log.recipients }}</pre></td>
+            <td>{{ log.subject }}</td>
+            <td>{{ "Sim" if log.success else "Não" }}</td>
+            <td><pre>{{ log.error or "-" }}</pre></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

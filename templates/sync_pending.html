@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Pendências de sincronização</h2>
+
+<p class="hint">
+    Esta tela mostra operações que foram salvas no banco, mas falharam ao sincronizar com arquivos externos,
+    como a planilha Excel em rede.
+</p>
+
+{% if active_pendings %}
+<form
+    method="post"
+    action="{{ url_for('sync_bp.retry_all') }}"
+    class="form-card"
+    onsubmit="return confirm('Deseja tentar reprocessar todas as pendências?');"
+>
+    <label for="performed_by_all">Executado por</label>
+    <button type="submit">
+        Tentar sincronizar todas
+    </button>
+</form>
+{% endif %}
+
+<h3>Pendências ativas</h3>
+
+{% if active_pendings %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Entidade</th>
+            <th>ID entidade</th>
+            <th>Ação</th>
+            <th>Destino</th>
+            <th>Status</th>
+            <th>Tentativas</th>
+            <th>Erro</th>
+            <th>Criado em</th>
+            <th>Última tentativa</th>
+            <th>Ação</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for pending in active_pendings %}
+        <tr>
+            <td>{{ pending.id }}</td>
+            <td>{{ pending.entity_type }}</td>
+            <td>{{ pending.entity_id }}</td>
+            <td>{{ pending.action }}</td>
+            <td>{{ pending.target }}</td>
+            <td>{{ pending.status }}</td>
+            <td>{{ pending.attempts }}</td>
+            <td>
+                <pre>{{ pending.last_error or "-" }}</pre>
+            </td>
+            <td>
+                {{ pending.created_at.strftime("%d/%m/%Y %H:%M") if pending.created_at else "-" }}
+            </td>
+            <td>
+                {{ pending.last_attempt_at.strftime("%d/%m/%Y %H:%M") if pending.last_attempt_at else "-" }}
+            </td>
+            <td>
+                <form
+                    method="post"
+                    action="{{ url_for('sync_bp.retry_pending', pending_id=pending.id) }}"
+                    onsubmit="return confirm('Deseja tentar sincronizar esta pendência?');"
+                >
+                    <button type="submit">
+                        Tentar novamente
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhuma pendência ativa.</p>
+{% endif %}
+
+
+<h3>Últimas pendências resolvidas</h3>
+
+{% if resolved_pendings %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Entidade</th>
+            <th>ID entidade</th>
+            <th>Ação</th>
+            <th>Destino</th>
+            <th>Tentativas</th>
+            <th>Resolvido por</th>
+            <th>Resolvido em</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for pending in resolved_pendings %}
+        <tr>
+            <td>{{ pending.id }}</td>
+            <td>{{ pending.entity_type }}</td>
+            <td>{{ pending.entity_id }}</td>
+            <td>{{ pending.action }}</td>
+            <td>{{ pending.target }}</td>
+            <td>{{ pending.attempts }}</td>
+            <td>{{ pending.resolved_by or "-" }}</td>
+            <td>
+                {{ pending.resolved_at.strftime("%d/%m/%Y %H:%M") if pending.resolved_at else "-" }}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhuma pendência resolvida registrada.</p>
+{% endif %}
+
+{% endblock %}

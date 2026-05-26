@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Auditoria</h2>
+
+<p class="hint">
+    Esta tela mostra ações importantes registradas no sistema:
+    criação, aprovação, rejeição, retirada, devolução, renovação e validações.
+</p>
+
+<form method="get" class="form-inline">
+    <input
+        type="text"
+        name="entity_type"
+        placeholder="Tipo: LOAN, EQUIPMENT..."
+        value="{{ entity_type }}"
+    >
+
+    <input
+        type="text"
+        name="action"
+        placeholder="Ação: CREATE_LOAN..."
+        value="{{ action }}"
+    >
+
+    <input
+        type="number"
+        name="entity_id"
+        placeholder="ID"
+        value="{{ entity_id }}"
+    >
+
+    <button type="submit">Filtrar</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Entidade</th>
+            <th>ID</th>
+            <th>Ação</th>
+            <th>Responsável</th>
+            <th>Dados anteriores</th>
+            <th>Dados novos</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+            <td>{{ log.entity_type }}</td>
+            <td>{{ log.entity_id }}</td>
+            <td>{{ log.action }}</td>
+            <td>{{ log.performed_by }}</td>
+            <td>
+                <pre>{{ log.old_data or "-" }}</pre>
+            </td>
+            <td>
+                <pre>{{ log.new_data or "-" }}</pre>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

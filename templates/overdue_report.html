@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Relatório de atrasos</h2>
+
+<p class="hint">
+    Esta tela mostra empréstimos com prazo de devolução vencido e ainda não finalizados.
+</p>
+
+{% if loans %}
+<table>
+    <thead>
+        <tr>
+            <th>Controle</th>
+            <th>Solicitante</th>
+            <th>Equipamento(s)</th>
+            <th>Previsão devolução</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for loan in loans %}
+        <tr>
+            <td><strong>{{ loan.numero_controle }}</strong></td>
+
+            <td>
+                {{ loan.user.nome }}
+                <br>
+                <small>{{ loan.user.email }}</small>
+            </td>
+
+            <td>
+                {% for item in loan.items %}
+                    {% if item.equipment %}
+                        <div class="loan-equipment-summary">
+                            <strong>{{ item.equipment.tipo_equipamento or "EQUIPAMENTO" }}</strong>
+                            <br>
+                            {{ item.equipment.fabricante or "-" }}
+                            {{ item.equipment.modelo or "-" }}
+                            <br>
+                            <small>
+                                Cód. Interno: {{ item.equipment.codigo_interno or "-" }} |
+                                Série: {{ item.equipment.serial or "-" }}
+                            </small>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </td>
+
+            <td>
+                {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+            </td>
+
+            <td>{{ loan.status }}</td>
+
+            <td>
+                <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                    Abrir
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum empréstimo atrasado encontrado.</p>
+{% endif %}
+
+{% endblock %}

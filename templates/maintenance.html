@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Manutenção do sistema</h2>
+
+<p class="hint">
+    Use esta tela para consultar o backup automático semanal e criar backups manuais do banco de dados.
+</p>
+
+<h3>Backup automático semanal</h3>
+
+{% if automatic_backup %}
+<table>
+    <thead>
+        <tr>
+            <th>Arquivo</th>
+            <th>Última atualização</th>
+            <th>Próxima atualização prevista</th>
+            <th>Tamanho</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <tr>
+            <td>{{ automatic_backup.filename }}</td>
+
+            <td>
+                {{ automatic_backup.created_at.strftime("%d/%m/%Y %H:%M:%S") }}
+            </td>
+
+            <td>
+                {{ automatic_backup.next_backup_at.strftime("%d/%m/%Y %H:%M:%S") }}
+            </td>
+
+            <td>
+                {{ "%.2f"|format(automatic_backup.size_bytes / 1024 / 1024) }} MB
+            </td>
+
+            <td>
+                <a href="{{ url_for('maintenance_bp.download_backup', filename=automatic_backup.filename) }}">
+                    Baixar
+                </a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+{% else %}
+<p>
+    Nenhum backup automático encontrado ainda. Ele será criado automaticamente ao abrir o Dashboard.
+</p>
+{% endif %}
+
+<hr>
+
+<h3>Backup manual</h3>
+
+<form
+    method="post"
+    action="{{ url_for('maintenance_bp.create_backup') }}"
+    onsubmit="return confirm('Deseja criar um backup manual agora?');"
+>
+    <button type="submit">
+        Criar Backup
+    </button>
+</form>
+
+<h3>Backups manuais existentes</h3>
+
+{% if manual_backups %}
+<table>
+    <thead>
+        <tr>
+            <th>Arquivo</th>
+            <th>Data</th>
+            <th>Tamanho</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for backup in manual_backups %}
+        <tr>
+            <td>{{ backup.filename }}</td>
+
+            <td>
+                {{ backup.created_at.strftime("%d/%m/%Y %H:%M:%S") }}
+            </td>
+
+            <td>
+                {{ "%.2f"|format(backup.size_bytes / 1024 / 1024) }} MB
+            </td>
+
+            <td>
+                <a href="{{ url_for('maintenance_bp.download_backup', filename=backup.filename) }}">
+                    Baixar
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum backup manual encontrado.</p>
+{% endif %}
+
+{% endblock %}

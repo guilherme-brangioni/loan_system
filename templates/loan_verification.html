@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Verificação de comprovante</h2>
+
+<section class="detail-grid">
+    <div>
+        <h3>Documento</h3>
+        <p><strong>Número de controle:</strong> {{ loan.numero_controle }}</p>
+        <p><strong>Status:</strong> {{ loan.status }}</p>
+    </div>
+
+    <div>
+        <h3>Datas</h3>
+        <p>
+            <strong>Data do empréstimo:</strong>
+            {{ loan.data_emprestimo.strftime("%d/%m/%Y") if loan.data_emprestimo else "-" }}
+        </p>
+        <p>
+            <strong>Previsão de devolução:</strong>
+            {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+        </p>
+        <p>
+            <strong>Data real de devolução:</strong>
+            {{ loan.data_real_devolucao.strftime("%d/%m/%Y") if loan.data_real_devolucao else "-" }}
+        </p>
+    </div>
+
+    <div>
+        <h3>Solicitante</h3>
+        <p>{{ loan.user.nome }}</p>
+        <p>Matrícula: {{ loan.user.matricula }}</p>
+    </div>
+</section>
+
+<h3>Equipamentos vinculados</h3>
+
+<table>
+    <thead>
+        <tr>
+            <th>Código interno</th>
+            <th>Tipo</th>
+            <th>Fabricante</th>
+            <th>Modelo</th>
+            <th>Cód. Equip.</th>
+            <th>Série</th>
+            <th>Status item</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for item in loan.items %}
+            {% if item.equipment %}
+            <tr>
+                <td>{{ item.equipment.codigo_interno or "-" }}</td>
+                <td>{{ item.equipment.tipo_equipamento or "-" }}</td>
+                <td>{{ item.equipment.fabricante or "-" }}</td>
+                <td>{{ item.equipment.modelo or "-" }}</td>
+                <td>{{ item.equipment.codigo_equipamento or "-" }}</td>
+                <td>{{ item.equipment.serial or "-" }}</td>
+                <td>{{ item.status }}</td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+
+<p class="hint">
+    Esta página confirma que o comprovante foi gerado pelo Sistema de Empréstimos.
+</p>
+
+{% endblock %}

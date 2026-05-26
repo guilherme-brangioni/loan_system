@@ -1,0 +1,9 @@
+{
+  "host": "smtp.office365.com",
+  "port": 587,
+  "username": "guilherme.bbrangioni@cemig.com.br",
+  "from_email": "guilherme.bbrangioni@cemig.com.br",
+  "password": "GbBrAng!oni-0803",
+  "use_starttls": true,
+  "timeout": 30
+}

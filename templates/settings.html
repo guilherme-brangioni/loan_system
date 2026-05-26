@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Configurações do sistema</h2>
+
+<p class="hint">
+    Estas configurações ficam salvas no banco de dados e sobrescrevem os valores padrão do config.py.
+</p>
+
+<div class="message warning">
+    Não armazene senhas nesta tela. Senhas SMTP e segredos devem continuar no arquivo .env ou em variáveis de ambiente.
+</div>
+
+<form method="post" class="form-card">
+
+    {% for setting in settings %}
+        <label for="{{ setting.key }}">
+            {{ setting.label }}
+        </label>
+
+        <input
+            type="text"
+            id="{{ setting.key }}"
+            name="{{ setting.key }}"
+            value="{{ setting.value }}"
+        >
+
+        <p class="hint">
+            {{ setting.description }}
+            <br>
+            Origem atual: <strong>{{ setting.source }}</strong>
+            {% if setting.updated_by %}
+                | Atualizado por: <strong>{{ setting.updated_by }}</strong>
+            {% endif %}
+            {% if setting.updated_at %}
+                | Em: {{ setting.updated_at.strftime("%d/%m/%Y %H:%M") }}
+            {% endif %}
+        </p>
+
+        <hr>
+    {% endfor %}
+
+    <button type="submit">
+        Salvar configurações
+    </button>
+
+</form>
+
+{% endblock %}

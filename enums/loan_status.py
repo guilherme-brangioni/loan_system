@@ -1,0 +1,16 @@
+from enum import Enum
+
+
+class LoanStatus(Enum):
+    """
+    Status do empréstimo como um todo.
+    """
+
+    PENDENTE_APROVACAO = "PENDENTE_APROVACAO"
+    APROVADO = "APROVADO"
+    RETIRADO = "RETIRADO"
+    PARCIALMENTE_DEVOLVIDO = "PARCIALMENTE_DEVOLVIDO"
+    FINALIZADO = "FINALIZADO"
+    ATRASADO = "ATRASADO"
+    REJEITADO = "REJEITADO"
+    CANCELADO = "CANCELADO"

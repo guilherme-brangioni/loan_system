@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Devolver item — {{ loan.numero_controle }}</h2>
+
+<form method="post" class="form-card">
+    <label>Item</label>
+    <select name="loan_item_id" required>
+        {% for item in loan.items %}
+            {% if item.status != "DEVOLVIDO" %}
+                <option value="{{ item.id }}">
+                    {% if item.equipment %}
+                        {{ item.equipment.nome }} / {{ item.equipment.codigo_interno }}
+                    {% elif item.consumable %}
+                        {{ item.consumable.nome }} — restante:
+                        {{ item.quantidade - item.quantidade_devolvida }}
+                    {% endif %}
+                </option>
+            {% endif %}
+        {% endfor %}
+    </select>
+
+    <label>Quantidade devolvida</label>
+    <input type="number" name="quantidade" value="1" min="1">
+
+    <label for="devolvido_por">Devolvido por *</label>
+    <input
+        type="text"
+        id="devolvido_por"
+        name="devolvido_por"
+        required
+        placeholder="Nome de quem está devolvendo o equipamento"
+    >
+
+    <p class="hint">
+        Informe o nome da pessoa que está devolvendo fisicamente o equipamento.
+        Pode ser o solicitante ou outra pessoa autorizada.
+    </p>
+
+    <button type="submit">Confirmar devolução</button>
+</form>
+
+{% endblock %}

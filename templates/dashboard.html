@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Dashboard</h2>
+
+<section class="cards">
+    <div class="card">
+        <strong>{{ borrowed_count }}</strong>
+        <span>Empréstimos ativos</span>
+    </div>
+
+    <div class="card warning">
+        <strong>{{ pending_approval_count }}</strong>
+        <span>Pendentes de aprovação</span>
+    </div>
+
+    <div class="card danger">
+        <strong>{{ pending_validation_count }}</strong>
+        <span>Pendentes de validação</span>
+    </div>
+
+    <div class="card">
+        <strong>{{ available_equipment }}</strong>
+        <span>Equipamentos disponíveis</span>
+    </div>
+</section>
+
+<form
+    method="post"
+    action="{{ url_for('main_bp.check_validation_reminders') }}"
+    onsubmit="return confirm('Deseja verificar pendências de validação e reenviar lembretes vencidos?');"
+>
+    <button type="submit">
+        Verificar pendências e reenviar lembretes
+    </button>
+</form>
+
+<p class="hint">
+    O Dashboard mostra apenas empréstimos ativos, pendentes de aprovação e pendentes de validação.
+    Empréstimos finalizados/devolvidos não aparecem aqui.
+</p>
+
+<h3>Equipamentos emprestados</h3>
+
+{% if borrowed_loans %}
+<table>
+    <thead>
+        <tr>
+            <th>Controle</th>
+            <th>Solicitante</th>
+            <th>Equipamento(s)</th>
+            <th>Status</th>
+            <th>Previsão devolução</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for loan in borrowed_loans %}
+        <tr>
+            <td><strong>{{ loan.numero_controle }}</strong></td>
+
+            <td>
+                {{ loan.user.nome }}
+                <br>
+                <small>{{ loan.user.matricula }}</small>
+            </td>
+
+            <td>
+                {% for item in loan.items %}
+                    {% if item.equipment %}
+                        <div class="loan-equipment-summary">
+                            <strong>{{ item.equipment.tipo_equipamento or "EQUIPAMENTO" }}</strong>
+                            <br>
+                            {{ item.equipment.fabricante or "-" }}
+                            {{ item.equipment.modelo or "-" }}
+                            <br>
+                            <small>
+                                Cód. Interno: {{ item.equipment.codigo_interno or "-" }} |
+                                Cód. Equip.: {{ item.equipment.codigo_equipamento or "-" }} |
+                                Série: {{ item.equipment.serial or "-" }}
+                            </small>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </td>
+
+            <td>{{ loan.status }}</td>
+
+            <td>
+                {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+            </td>
+
+            <td>
+                <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                    Abrir
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum equipamento emprestado no momento.</p>
+{% endif %}
+
+
+<h3>Pendentes de aprovação</h3>
+
+{% if pending_approval_loans %}
+<table>
+    <thead>
+        <tr>
+            <th>Controle</th>
+            <th>Solicitante</th>
+            <th>Aprovador</th>
+            <th>Equipamento(s)</th>
+            <th>Criado em</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for loan in pending_approval_loans %}
+        <tr>
+            <td><strong>{{ loan.numero_controle }}</strong></td>
+
+            <td>{{ loan.user.nome }}</td>
+
+            <td>{{ loan.approver.nome }}</td>
+
+            <td>
+                {% for item in loan.items %}
+                    {% if item.equipment %}
+                        <div class="loan-equipment-summary">
+                            {{ item.equipment.tipo_equipamento or "EQUIPAMENTO" }}
+                            -
+                            {{ item.equipment.fabricante or "-" }}
+                            {{ item.equipment.modelo or "-" }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </td>
+
+            <td>{{ loan.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+
+            <td>
+                <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                    Abrir
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum empréstimo pendente de aprovação.</p>
+{% endif %}
+
+
+<h3>Pendentes de validação</h3>
+
+{% if pending_validation_loans %}
+<table>
+    <thead>
+        <tr>
+            <th>Controle</th>
+            <th>Solicitante</th>
+            <th>Equipamento(s) pendente(s)</th>
+            <th>Status</th>
+            <th>Ação</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for loan in pending_validation_loans %}
+        <tr>
+            <td><strong>{{ loan.numero_controle }}</strong></td>
+
+            <td>{{ loan.user.nome }}</td>
+
+            <td>
+                {% for item in loan.items %}
+                    {% if item.equipment and not item.equipment.validado %}
+                        <div class="loan-equipment-summary">
+                            <strong>{{ item.equipment.tipo_equipamento or "EQUIPAMENTO" }}</strong>
+                            <br>
+                            {{ item.equipment.fabricante or "-" }}
+                            {{ item.equipment.modelo or "-" }}
+                            <br>
+                            <small>
+                                Cód. Interno: {{ item.equipment.codigo_interno or "-" }} |
+                                Cód. Equip.: {{ item.equipment.codigo_equipamento or "-" }} |
+                                Série: {{ item.equipment.serial or "-" }}
+                            </small>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </td>
+
+            <td>{{ loan.status }}</td>
+
+            <td>
+                <form
+                    method="post"
+                    action="{{ url_for('loan_bp.validate_loan_equipments', loan_id=loan.id) }}"
+                    onsubmit="return confirm('Confirmar validação dos equipamentos deste empréstimo?');"
+                >
+
+                    <button type="submit">
+                        Validar empréstimo
+                    </button>
+                    
+                </form>
+
+                <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                    Abrir
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum empréstimo com equipamento pendente de validação.</p>
+{% endif %}
+
+{% endblock %}

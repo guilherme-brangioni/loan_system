@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Novo empréstimo</h2>
+
+<form
+    method="post"
+    class="form-card"
+    action="{{ url_for('loan_bp.new_loan') }}"
+    enctype="multipart/form-data"
+>
+
+    <h3>1. Dados do solicitante</h3>
+
+    <label for="nome">Nome do solicitante *</label>
+    <input type="text" id="nome" name="nome" required>
+
+    <label for="matricula">Matrícula *</label>
+    <input type="text" id="matricula" name="matricula" required>
+
+    <label for="email">E-mail do solicitante *</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="telefone">Telefone</label>
+    <input type="text" id="telefone" name="telefone">
+
+    <label for="gerencia">Gerência</label>
+    <input type="text" id="gerencia" name="gerencia">
+
+    <label for="regional">Regional</label>
+    <input type="text" id="regional" name="regional">
+
+    <label for="equipe">Equipe</label>
+    <input type="text" id="equipe" name="equipe">
+
+    <hr>
+
+    <h3>2. Dados do aprovador</h3>
+
+    <label for="approver_nome">Nome do aprovador *</label>
+    <input type="text" id="approver_nome" name="approver_nome" required>
+
+    <label for="approver_matricula">Matrícula do aprovador</label>
+    <input type="text" id="approver_matricula" name="approver_matricula">
+
+    <label for="approver_email">E-mail do aprovador *</label>
+    <input type="email" id="approver_email" name="approver_email" required>
+
+    <hr>
+
+    <h3>3. Responsável pela entrega</h3>
+
+    <label for="responsavel_entrega_nome">Nome do responsável pela entrega *</label>
+    <input
+        type="text"
+        id="responsavel_entrega_nome"
+        name="responsavel_entrega_nome"
+        required
+    >
+
+    <label for="responsavel_entrega_matricula">Matrícula do responsável pela entrega</label>
+    <input
+        type="text"
+        id="responsavel_entrega_matricula"
+        name="responsavel_entrega_matricula"
+    >
+
+    <label for="responsavel_entrega_email">E-mail do responsável pela coleta/entrega *</label>
+    <input
+        type="email"
+        id="responsavel_entrega_email"
+        name="responsavel_entrega_email"
+        required
+        placeholder="responsavel@empresa.com"
+    >
+
+    <hr>
+
+    <h3>4. Dados do empréstimo</h3>
+
+    <label for="local_utilizacao">Local de utilização</label>
+    <input type="text" id="local_utilizacao" name="local_utilizacao">
+
+    <label for="data_prevista_devolucao">Data prevista de devolução *</label>
+    <input
+        type="date"
+        id="data_prevista_devolucao"
+        name="data_prevista_devolucao"
+        required
+    >
+
+    <hr>
+
+    <h3>5. Equipamentos/materiais emprestados</h3>
+
+    <p class="hint">
+        Busque equipamentos já cadastrados no banco por patrimônio, código, série,
+        fabricante, modelo ou tipo. Apenas equipamentos disponíveis aparecerão.
+    </p>
+
+    <label for="equipment_search">Buscar equipamento</label>
+    <div class="search-row">
+        <input
+            type="text"
+            id="equipment_search"
+            placeholder="Digite patrimônio, código, série, fabricante, modelo ou tipo"
+            autocomplete="off"
+        >
+
+        <button type="button" onclick="searchEquipments()">
+            Buscar
+        </button>
+    </div>
+
+    <div id="search-results" class="search-results"></div>
+
+    <h4>Equipamentos selecionados</h4>
+
+    <div id="selected-equipments" class="selected-equipments">
+        <p class="hint" id="no-selected-message">
+            Nenhum equipamento selecionado.
+        </p>
+    </div>
+
+    <hr>
+
+    <h3>6. Destinatários informativos</h3>
+
+    <p class="hint">
+        Estes e-mails receberão a informação de que a solicitação de empréstimo foi registrada.
+    </p>
+
+    <p class="hint">
+        O solicitante também receberá automaticamente a informação da solicitação no e-mail informado no cadastro.
+    </p>
+
+    <h4>E-mails fixos</h4>
+
+    {% if fixed_notification_emails %}
+        <ul>
+            {% for email in fixed_notification_emails %}
+                <li>{{ email }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nenhum e-mail fixo configurado.</p>
+    {% endif %}
+
+    <label for="notification_emails">E-mails adicionais para este empréstimo</label>
+    <textarea
+        id="notification_emails"
+        name="notification_emails"
+        rows="4"
+        placeholder="Digite e-mails adicionais separados por vírgula, ponto e vírgula ou linha."
+    ></textarea>
+
+    <p class="hint">
+        Exemplo:
+        <br>
+        gestor@empresa.com; equipe.campo@empresa.com
+    </p>
+
+    <hr>
+
+    <label for="observacoes">Observações</label>
+    <textarea
+        id="observacoes"
+        name="observacoes"
+        rows="4"
+    ></textarea>
+
+    <button type="submit">Criar empréstimo</button>
+
+</form>
+
+<script>
+const selectedEquipments = new Map();
+
+function equipmentLabel(item) {
+    return `
+        <strong>${item.tipo_equipamento || "-"}</strong> —
+        ${item.fabricante || "-"} ${item.modelo || "-"}
+        <br>
+        Patrimônio: ${item.patrimonio || "-"} |
+        Código Equip.: ${item.codigo_equipamento || "-"} |
+        Série: ${item.serial || "-"} |
+        Código interno: ${item.codigo_interno || "-"}
+        <br>
+        Regional: ${item.regional || "-"} |
+        Local: ${item.local_armazenagem || "-"}
+    `;
+}
+
+async function searchEquipments() {
+    const input = document.getElementById("equipment_search");
+    const resultsDiv = document.getElementById("search-results");
+
+    const query = input.value.trim();
+
+    resultsDiv.innerHTML = "";
+
+    if (!query) {
+        resultsDiv.innerHTML = `<p class="hint">Digite algo para buscar.</p>`;
+        return;
+    }
+
+    try {
+        const response = await fetch(`/itens/buscar?q=${encodeURIComponent(query)}`);
+        const items = await response.json();
+
+        if (!items.length) {
+            resultsDiv.innerHTML = `
+                <p class="hint">
+                    Nenhum equipamento disponível encontrado.
+                    Verifique se o item já foi sincronizado/cadastrado e se está DISPONÍVEL.
+                </p>
+            `;
+            return;
+        }
+
+        items.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "equipment-result-card";
+
+            card.innerHTML = `
+                <div>
+                    ${equipmentLabel(item)}
+                </div>
+
+                <button type="button">
+                    Adicionar
+                </button>
+            `;
+
+            const button = card.querySelector("button");
+
+            button.addEventListener("click", () => {
+                addSelectedEquipment(item);
+            });
+
+            resultsDiv.appendChild(card);
+        });
+
+    } catch (error) {
+        resultsDiv.innerHTML = `
+            <p class="message error">
+                Erro ao buscar equipamentos: ${error}
+            </p>
+        `;
+    }
+}
+
+function addSelectedEquipment(item) {
+    if (selectedEquipments.has(String(item.id))) {
+        alert("Este equipamento já foi adicionado.");
+        return;
+    }
+
+    selectedEquipments.set(String(item.id), item);
+
+    renderSelectedEquipments();
+}
+
+function removeSelectedEquipment(id) {
+    selectedEquipments.delete(String(id));
+
+    renderSelectedEquipments();
+}
+
+function renderSelectedEquipments() {
+    const selectedDiv = document.getElementById("selected-equipments");
+
+    selectedDiv.innerHTML = "";
+
+    if (selectedEquipments.size === 0) {
+        selectedDiv.innerHTML = `
+            <p class="hint" id="no-selected-message">
+                Nenhum equipamento selecionado.
+            </p>
+        `;
+        return;
+    }
+
+    selectedEquipments.forEach((item, id) => {
+        const card = document.createElement("div");
+        card.className = "selected-equipment-card";
+
+        card.innerHTML = `
+            <input type="hidden" name="selected_equipment_ids[]" value="${id}">
+
+            <div>
+                ${equipmentLabel(item)}
+
+                <label style="margin-top: 10px;">
+                    Imagem do equipamento
+                </label>
+
+                <input
+                    type="file"
+                    name="equipment_image_${id}"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                >
+
+                <small>
+                    Opcional. A imagem aparecerá em uma nova página do comprovante PDF.
+                </small>
+            </div>
+
+            <button type="button" onclick="removeSelectedEquipment('${id}')">
+                Remover
+            </button>
+        `;
+
+        selectedDiv.appendChild(card);
+    });
+}
+
+document.getElementById("equipment_search").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        searchEquipments();
+    }
+});
+
+let itemCounter = 1;
+
+function addItem() {
+    itemCounter += 1;
+
+    const container = document.getElementById("items-container");
+
+    const div = document.createElement("div");
+    div.className = "item-card";
+
+    div.innerHTML = `
+        <h4>Item ${itemCounter}</h4>
+
+        <label>Fabricante *</label>
+        <input type="text" name="fabricante[]" required placeholder="Ex.: Dell">
+
+        <label>Modelo *</label>
+        <input type="text" name="modelo[]" required placeholder="Ex.: Latitude 5420">
+
+        <label>Tipo de equipamento *</label>
+        <input type="text" name="tipo_equipamento[]" required placeholder="Ex.: Notebook">
+
+        <label>Patrimônio *</label>
+        <input type="text" name="patrimonio[]" required placeholder="Ex.: PAT123 ou N/A">
+
+        <label>Código do equipamento</label>
+        <input type="text" name="codigo_equipamento[]" placeholder="Código vindo da planilha, se houver">
+
+        <label>Serial</label>
+        <input type="text" name="serial[]" placeholder="Número de série">
+
+        <label>Categoria</label>
+        <input type="text" name="categoria[]" placeholder="Ex.: Informática">
+
+        <button type="button" onclick="this.parentElement.remove()">Remover item</button>
+    `;
+
+    container.appendChild(div);
+}
+</script>
+
+{% endblock %}
