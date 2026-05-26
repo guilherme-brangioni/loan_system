@@ -89,10 +89,7 @@ class ExcelMovementService:
 
     @staticmethod
     def _load_or_create_workbook():
-        file_path = AppSettingService.get(
-            "EXCEL_MOVEMENTS_FILE",
-            current_app.config["EXCEL_MOVEMENTS_FILE"],
-        )
+        file_path = ExcelMovementService._get_movements_file_path()
 
         folder = os.path.dirname(file_path)
 
@@ -108,10 +105,7 @@ class ExcelMovementService:
 
     @staticmethod
     def _get_or_create_sheet(workbook):
-        sheet_name = AppSettingService.get(
-            "EXCEL_MOVEMENTS_SHEET",
-            current_app.config["EXCEL_MOVEMENTS_SHEET"],
-        )
+        sheet_name = ExcelMovementService._get_movements_sheet_name()
 
         if sheet_name in workbook.sheetnames:
             return workbook[sheet_name]
@@ -309,3 +303,37 @@ class ExcelMovementService:
                 "success": False,
                 "error": str(exc),
             }
+    
+    @staticmethod
+    def _get_movements_file_path() -> str:
+        """
+        Retorna o caminho da planilha de movimentações usada pelo Power BI.
+
+        Prioridade:
+        1. Valor salvo na tela Configurações;
+        2. Valor padrão do config.py.
+        """
+
+        file_path = AppSettingService.get(
+            "EXCEL_MOVEMENTS_FILE",
+            current_app.config["EXCEL_MOVEMENTS_FILE"],
+        )
+
+        return str(file_path or "").strip()
+
+    @staticmethod
+    def _get_movements_sheet_name() -> str:
+        """
+        Retorna o nome da aba da planilha de movimentações.
+
+        Prioridade:
+        1. Valor salvo na tela Configurações;
+        2. Valor padrão do config.py.
+        """
+
+        sheet_name = AppSettingService.get(
+            "EXCEL_MOVEMENTS_SHEET",
+            current_app.config["EXCEL_MOVEMENTS_SHEET"],
+        )
+
+        return str(sheet_name or "").strip()

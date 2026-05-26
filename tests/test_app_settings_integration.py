@@ -8,6 +8,7 @@ from models.loan import Loan
 from services.pdf_service import PDFService
 from services.backup_service import BackupService
 from services.excel_inventory_service import ExcelInventoryService
+from services.excel_movement_service import ExcelMovementService
 
 from tests.test_pdf_and_verification import create_test_loan_with_item
 
@@ -250,3 +251,58 @@ def test_excel_inventory_sheet_uses_setting_value(
         sheet_name = ExcelInventoryService._get_inventory_sheet_name()
 
         assert sheet_name == "Inventario_Teste"
+
+
+def test_excel_movements_file_uses_setting_value(
+    app,
+    login_user,
+):
+    """
+    Garante que ExcelMovementService usa EXCEL_MOVEMENTS_FILE salvo nas configurações.
+    """
+
+    login_user(role="ADMIN")
+
+    custom_file = os.path.join(
+        app.config["BACKUP_DIR"],
+        "movimentacoes_teste.xlsx",
+    )
+
+    with app.app_context():
+        setting = AppSetting()
+        setting.key = "EXCEL_MOVEMENTS_FILE"
+        setting.value = custom_file
+        setting.description = "Planilha de movimentações Power BI"
+        setting.updated_by = "TESTE"
+
+        db.session.add(setting)
+        db.session.commit()
+
+        file_path = ExcelMovementService._get_movements_file_path()
+
+        assert file_path == custom_file
+
+
+def test_excel_movements_sheet_uses_setting_value(
+    app,
+    login_user,
+):
+    """
+    Garante que ExcelMovementService usa EXCEL_MOVEMENTS_SHEET salvo nas configurações.
+    """
+
+    login_user(role="ADMIN")
+
+    with app.app_context():
+        setting = AppSetting()
+        setting.key = "EXCEL_MOVEMENTS_SHEET"
+        setting.value = "Movimentacoes_Teste"
+        setting.description = "Aba de movimentações Power BI"
+        setting.updated_by = "TESTE"
+
+        db.session.add(setting)
+        db.session.commit()
+
+        sheet_name = ExcelMovementService._get_movements_sheet_name()
+
+        assert sheet_name == "Movimentacoes_Teste"
