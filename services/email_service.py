@@ -506,3 +506,72 @@ O comprovante atualizado está anexado.
 Atenciosamente,
 AT/PM - Gestão de Empréstimos e Sobressalentes
 """
+    
+    @staticmethod
+    def build_loan_receipt_body(loan) -> str:
+        """
+        Monta o e-mail de comprovante de empréstimo.
+
+        Usado pelo processamento assíncrono de pendências externas.
+        """
+
+        item_lines = []
+
+        for item in getattr(loan, "items", []) or []:
+            equipment = getattr(item, "equipment", None)
+
+            if equipment is None:
+                continue
+
+            item_lines.append(
+                f"- {equipment.tipo_equipamento or 'EQUIPAMENTO'} | "
+                f"Fabricante: {equipment.fabricante or '-'} | "
+                f"Modelo: {equipment.modelo or '-'} | "
+                f"Patrimônio: {equipment.patrimonio or '-'} | "
+                f"Código equipamento: {equipment.codigo_equipamento or '-'} | "
+                f"Série: {equipment.serial or '-'} | "
+                f"Código interno: {equipment.codigo_interno or '-'} | "
+                f"Status do item: {item.status}"
+            )
+
+        items_text = "\n".join(item_lines) or "- Nenhum item encontrado."
+
+        return f"""Olá,
+
+Segue o comprovante de empréstimo de equipamento/material.
+
+Número de controle:
+{loan.numero_controle}
+
+Status atual:
+{loan.status}
+
+Solicitante:
+{loan.user.nome}
+{loan.user.email}
+
+Aprovador:
+{loan.approver.nome}
+{loan.approver.email}
+
+Responsável pela coleta/entrega:
+{loan.responsavel_entrega_nome}
+{loan.responsavel_entrega_email or "E-mail não informado"}
+
+Data do empréstimo:
+{loan.data_emprestimo.strftime("%d/%m/%Y") if loan.data_emprestimo else "Não informado"}
+
+Data prevista de devolução:
+{loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "Não informado"}
+
+Local de utilização:
+{loan.local_utilizacao or "Não informado"}
+
+Itens:
+{items_text}
+
+O comprovante em PDF está anexado.
+
+Atenciosamente,
+AT/PM - Gestão de Empréstimos e Sobressalentes
+"""

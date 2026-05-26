@@ -26,6 +26,33 @@
     </div>
 </section>
 
+{% if current_user and current_user.role in ["ADMIN", "OPERADOR"] %}
+<section class="dashboard-alert-row">
+    <a
+        class="dashboard-small-alert {% if external_pending_count > 0 %}has-pending{% endif %}"
+        href="{{ url_for('external_pending_bp.external_pending_page') }}"
+    >
+        <span class="dashboard-small-alert-number">
+            {{ external_pending_count }}
+        </span>
+
+        <span>
+            Pendências externas
+        </span>
+
+        {% if external_pending_count > 0 %}
+            <small>
+                Processar e-mails, PDFs ou exportações pendentes
+            </small>
+        {% else %}
+            <small>
+                Nenhuma pendência externa ativa
+            </small>
+        {% endif %}
+    </a>
+</section>
+{% endif %}
+
 <form
     method="post"
     action="{{ url_for('main_bp.check_validation_reminders') }}"

@@ -891,3 +891,64 @@ td small {
     background: #fee2e2;
     color: #991b1b;
 }
+
+/* Dashboard - pendências externas */
+.dashboard-alert-row {
+    margin: 8px 0 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dashboard-small-alert {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 8px 12px;
+    border-radius: 999px;
+
+    background: #ecfdf5;
+    border: 1px solid #10b981;
+    color: #064e3b;
+
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.dashboard-small-alert:hover {
+    background: #d1fae5;
+    color: #064e3b;
+    text-decoration: none;
+}
+
+.dashboard-small-alert.has-pending {
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+}
+
+.dashboard-small-alert.has-pending:hover {
+    background: #fde68a;
+    color: #92400e;
+}
+
+.dashboard-small-alert-number {
+    min-width: 24px;
+    min-height: 24px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+    background: white;
+    color: inherit;
+
+    font-weight: 700;
+}
+
+.dashboard-small-alert small {
+    font-weight: 400;
+    opacity: 0.85;
+}

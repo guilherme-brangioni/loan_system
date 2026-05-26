@@ -10,3 +10,4 @@ from models.email_log import EmailLog
 from models.system_user import SystemUser
 from models.sync_pending import SyncPending
 from models.app_setting import AppSetting
+from models.external_pending import ExternalPending

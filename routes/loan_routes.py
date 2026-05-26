@@ -30,9 +30,9 @@ from services.notification_recipient_service import NotificationRecipientService
 from services.pdf_service import PDFService
 from services.image_upload_service import ImageUploadService
 from services.audit_service import AuditService
-from services.excel_movement_service import ExcelMovementService
 from services.auth_service import AuthService
 from services.verification_token_service import VerificationTokenService
+from services.external_pending_service import ExternalPendingService
 
 from utils.normalize import normalize_name
 from utils.query_options import loan_full_options
@@ -282,11 +282,12 @@ def new_loan():
                         file_storage=uploaded_file,
                     )
 
-            ExcelMovementService.try_append_loan_movement(
-                loan=loan,
+            ExternalPendingService.enqueue_loan_movement(
+                loan_id=loan.id,
                 movement_type="SOLICITACAO",
                 performed_by=loan.responsavel_entrega_nome,
                 notes="Solicitação de empréstimo criada.",
+                created_by=loan.responsavel_entrega_nome,
             )
 
             review_url = (
@@ -413,11 +414,12 @@ def approve_loan(token: str):
     try:
         loan = LoanService.approve_loan(token)
 
-        ExcelMovementService.try_append_loan_movement(
-            loan=loan,
+        ExternalPendingService.enqueue_loan_movement(
+            loan_id=loan.id,
             movement_type="APROVACAO",
             performed_by=loan.approver.nome,
             notes="Solicitação aprovada.",
+            created_by=loan.approver.nome,
         )
 
         flash(
@@ -450,11 +452,12 @@ def reject_loan(token: str):
             reason=reason or "Rejeitado pelo aprovador.",
         )
 
-        ExcelMovementService.try_append_loan_movement(
-            loan=loan,
+        ExternalPendingService.enqueue_loan_movement(
+            loan_id=loan.id,
             movement_type="REJEICAO",
             performed_by=loan.approver.nome,
             notes=reason or "Rejeitado pelo aprovador.",
+            created_by=loan.approver.nome,
         )
 
         flash(
@@ -493,48 +496,18 @@ def confirm_withdrawal(loan_id: int):
             performed_by=performed_by,
         )
 
-        ExcelMovementService.try_append_loan_movement(
-            loan=loan,
+        ExternalPendingService.enqueue_loan_movement(
+            loan_id=loan.id,
             movement_type="RETIRADA",
             performed_by=performed_by,
             notes="Retirada/coleta confirmada.",
+            created_by=performed_by,
         )
 
-        pdf_path = PDFService.generate_loan_pdf(loan)
-
-        body = EmailService.build_confirmation_body(loan)
-
-        receipt_recipients = (
-    NotificationRecipientService.get_loan_receipt_recipients(loan)
-)
-
-        result = EmailService.try_send_email(
-            recipients=receipt_recipients,
-            subject=f"Comprovante de empréstimo - {loan.numero_controle}",
-            body=body,
-            attachment_path=pdf_path,
-        )
-
-        EmailLogService.register(
-            email_type="LOAN_RECEIPT",
+        ExternalPendingService.enqueue_loan_receipt_email(
             loan_id=loan.id,
-            recipients=receipt_recipients,
-            subject=f"Comprovante de empréstimo - {loan.numero_controle}",
-            success=bool(result.get("success")),
-            error=result.get("error"),
+            created_by=performed_by,
         )
-
-        if result.get("success"):
-            flash(
-                "Retirada confirmada e comprovante enviado por e-mail.",
-                "success",
-            )
-        else:
-            flash(
-                "Retirada confirmada, mas houve falha ao enviar e-mail: "
-                + result.get("error", "Erro desconhecido."),
-                "error",
-            )
 
     except Exception as exc:
         flash(str(exc), "error")
@@ -573,58 +546,20 @@ def return_items(loan_id: int):
                 devolvido_por=devolvido_por,
             )
 
-            ExcelMovementService.try_append_loan_movement(
-                loan=loan,
+            ExternalPendingService.enqueue_loan_movement(
+                loan_id=loan.id,
                 movement_type="DEVOLUCAO_ITEM",
                 performed_by=devolvido_por,
                 notes="Devolução de item registrada.",
+                created_by=devolvido_por,
             )
 
-            pdf_path = PDFService.generate_loan_pdf(loan)
-
-            return_recipients = (
-                NotificationRecipientService.get_loan_receipt_recipients(loan)
+            ExternalPendingService.enqueue_return_confirmation_email(
+                loan_id=loan.id,
+                returned_by=devolvido_por,
+                return_type="DEVOLUCAO_ITEM",
+                created_by=devolvido_por,
             )
-
-            if return_recipients:
-                subject = (
-                    f"Confirmação de devolução - "
-                    f"{loan.numero_controle}"
-                )
-
-                body = EmailService.build_return_confirmation_body(
-                    loan=loan,
-                    returned_by=devolvido_por,
-                    return_type="DEVOLUCAO_ITEM",
-                )
-
-                result = EmailService.try_send_email(
-                    recipients=return_recipients,
-                    subject=subject,
-                    body=body,
-                    attachment_path=pdf_path,
-                )
-
-                EmailLogService.register(
-                    email_type="RETURN_CONFIRMATION",
-                    loan_id=loan.id,
-                    recipients=return_recipients,
-                    subject=subject,
-                    success=bool(result.get("success")),
-                    error=result.get("error"),
-                )
-
-                if result.get("success"):
-                    flash(
-                        "E-mail de confirmação de devolução enviado.",
-                        "success",
-                    )
-                else:
-                    flash(
-                        "Devolução registrada, mas houve falha ao enviar e-mail: "
-                        + result.get("error", "Erro desconhecido."),
-                        "error",
-                    )
 
             flash("Item devolvido com sucesso.", "success")
 
@@ -654,11 +589,12 @@ def renew_loan(loan_id: int):
             reason=form_data.get("reason", ""),
         )
 
-        ExcelMovementService.try_append_loan_movement(
-            loan=loan,
+        ExternalPendingService.enqueue_loan_movement(
+            loan_id=loan.id,
             movement_type="RENOVACAO",
             performed_by=AuthService.get_current_user_display_name(),
             notes=form_data.get("reason", ""),
+            created_by=AuthService.get_current_user_display_name(),
         )
 
         flash("Empréstimo renovado com sucesso.", "success")
@@ -707,58 +643,20 @@ def return_all_items(loan_id: int):
             devolvido_por=devolvido_por,
         )
 
-        ExcelMovementService.try_append_loan_movement(
-            loan=loan,
+        ExternalPendingService.enqueue_loan_movement(
+            loan_id=loan.id,
             movement_type="DEVOLUCAO_TOTAL",
             performed_by=devolvido_por,
             notes="Devolução total registrada.",
+            created_by=devolvido_por,
         )
 
-        pdf_path = PDFService.generate_loan_pdf(loan)
-
-        return_recipients = (
-            NotificationRecipientService.get_loan_receipt_recipients(loan)
+        ExternalPendingService.enqueue_return_confirmation_email(
+            loan_id=loan.id,
+            returned_by=devolvido_por,
+            return_type="DEVOLUCAO_TOTAL",
+            created_by=devolvido_por,
         )
-
-        if return_recipients:
-            subject = (
-                f"Confirmação de devolução total - "
-                f"{loan.numero_controle}"
-            )
-
-            body = EmailService.build_return_confirmation_body(
-                loan=loan,
-                returned_by=devolvido_por,
-                return_type="DEVOLUCAO_TOTAL",
-            )
-
-            result = EmailService.try_send_email(
-                recipients=return_recipients,
-                subject=subject,
-                body=body,
-                attachment_path=pdf_path,
-            )
-
-            EmailLogService.register(
-                email_type="RETURN_TOTAL_CONFIRMATION",
-                loan_id=loan.id,
-                recipients=return_recipients,
-                subject=subject,
-                success=bool(result.get("success")),
-                error=result.get("error"),
-            )
-
-            if result.get("success"):
-                flash(
-                    "E-mail de confirmação de devolução total enviado.",
-                    "success",
-                )
-            else:
-                flash(
-                    "Devolução registrada, mas houve falha ao enviar e-mail: "
-                    + result.get("error", "Erro desconhecido."),
-                    "error",
-                )
 
         flash("Empréstimo marcado como devolvido com sucesso.", "success")
 

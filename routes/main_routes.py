@@ -9,6 +9,7 @@ from models.loan import Loan
 from services.loan_service import LoanService
 from services.validation_reminder_service import ValidationReminderService
 from services.backup_service import BackupService
+from services.external_pending_service import ExternalPendingService
 
 from utils.query_options import loan_full_options
 
@@ -97,6 +98,8 @@ def dashboard():
 
     last_validation_check = request.args.get("validation_check", "")
 
+    external_pending_count = ExternalPendingService.count_active_pendings()
+
     return render_template(
         "dashboard.html",
         borrowed_loans=borrowed_loans,
@@ -106,6 +109,7 @@ def dashboard():
         pending_approval_count=len(pending_approval_loans),
         pending_validation_count=len(pending_validation_loans),
         available_equipment=available_equipment,
+                external_pending_count=external_pending_count,
         last_validation_check=last_validation_check,
     )
 

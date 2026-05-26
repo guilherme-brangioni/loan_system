@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Pendências externas</h2>
+
+<p class="hint">
+    Esta tela processa tarefas externas que podem ser lentas ou falhar:
+    envio de e-mail, geração de PDF e exportação para Excel.
+</p>
+
+{% if active_pendings %}
+<form
+    method="post"
+    action="{{ url_for('external_pending_bp.process_all') }}"
+    onsubmit="return confirm('Deseja processar todas as pendências externas?');"
+>
+    <button type="submit">
+        Processar todas
+    </button>
+</form>
+{% endif %}
+
+<h3>Pendências ativas</h3>
+
+{% if active_pendings %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Ação</th>
+            <th>Entidade</th>
+            <th>Status</th>
+            <th>Tentativas</th>
+            <th>Criada por</th>
+            <th>Criada em</th>
+            <th>Último erro</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for pending in active_pendings %}
+        <tr>
+            <td>{{ pending.id }}</td>
+            <td>{{ pending.action }}</td>
+            <td>{{ pending.entity_type }} #{{ pending.entity_id }}</td>
+            <td>{{ pending.status }}</td>
+            <td>{{ pending.attempts }} / {{ pending.max_attempts }}</td>
+            <td>{{ pending.created_by or "-" }}</td>
+            <td>{{ pending.created_at.strftime("%d/%m/%Y %H:%M") if pending.created_at else "-" }}</td>
+            <td>
+                <pre>{{ pending.last_error or "-" }}</pre>
+            </td>
+            <td>
+                <form
+                    method="post"
+                    action="{{ url_for('external_pending_bp.process_one', pending_id=pending.id) }}"
+                    onsubmit="return confirm('Deseja processar esta pendência?');"
+                >
+                    <button type="submit">
+                        Processar
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhuma pendência externa ativa.</p>
+{% endif %}
+
+<h3>Últimas resolvidas</h3>
+
+{% if resolved_pendings %}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Ação</th>
+            <th>Entidade</th>
+            <th>Tentativas</th>
+            <th>Resolvida por</th>
+            <th>Resolvida em</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for pending in resolved_pendings %}
+        <tr>
+            <td>{{ pending.id }}</td>
+            <td>{{ pending.action }}</td>
+            <td>{{ pending.entity_type }} #{{ pending.entity_id }}</td>
+            <td>{{ pending.attempts }}</td>
+            <td>{{ pending.resolved_by or "-" }}</td>
+            <td>{{ pending.resolved_at.strftime("%d/%m/%Y %H:%M") if pending.resolved_at else "-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhuma pendência resolvida.</p>
+{% endif %}
+
+{% endblock %}
