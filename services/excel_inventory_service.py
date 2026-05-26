@@ -80,10 +80,7 @@ class ExcelInventoryService:
         Abre uma cópia local da planilha em rede para leitura.
         """
 
-        source_path = AppSettingService.get(
-            "EXCEL_INVENTORY_FILE",
-            current_app.config["EXCEL_INVENTORY_FILE"],
-        )
+        source_path = ExcelInventoryService._get_inventory_file_path()
 
         temp_file = ExcelInventoryService._copy_network_file_to_temp(
             source_path
@@ -101,15 +98,9 @@ class ExcelInventoryService:
     def _load_workbook_for_write():
         """
         Abre a planilha original em rede para escrita.
-
-        Usado quando um item é cadastrado manualmente no sistema e queremos
-        refletir essa inclusão/alteração na planilha.
-
-        Atenção:
-        se a planilha estiver aberta ou bloqueada, pode ocorrer erro.
         """
 
-        file_path = current_app.config["EXCEL_INVENTORY_FILE"]
+        file_path = ExcelInventoryService._get_inventory_file_path()
 
         if not os.path.exists(file_path):
             raise FileNotFoundError(
@@ -843,3 +834,37 @@ class ExcelInventoryService:
         finally:
             if workbook is not None:
                 workbook.close()
+
+    @staticmethod
+    def _get_inventory_file_path() -> str:
+        """
+        Retorna o caminho da planilha de inventário.
+
+        Prioridade:
+        1. Valor salvo na tela Configurações;
+        2. Valor padrão do config.py.
+        """
+
+        file_path = AppSettingService.get(
+            "EXCEL_INVENTORY_FILE",
+            current_app.config["EXCEL_INVENTORY_FILE"],
+        )
+
+        return str(file_path or "").strip()
+
+    @staticmethod
+    def _get_inventory_sheet_name() -> str:
+        """
+        Retorna o nome da aba da planilha de inventário.
+
+        Prioridade:
+        1. Valor salvo na tela Configurações;
+        2. Valor padrão do config.py.
+        """
+
+        sheet_name = AppSettingService.get(
+            "EXCEL_INVENTORY_SHEET",
+            current_app.config["EXCEL_INVENTORY_SHEET"],
+        )
+
+        return str(sheet_name or "").strip()
