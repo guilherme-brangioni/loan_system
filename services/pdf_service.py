@@ -746,8 +746,8 @@ class PDFService:
         """
         Monta a URL de verificação usada no QR Code.
 
-        Não usa url_for(), porque o PDF pode ser gerado fora de uma
-        requisição HTTP ativa, como em testes automatizados ou tarefas internas.
+        Agora usa APP_BASE_URL salvo na tela de Configurações.
+        Se não houver valor no banco, usa o valor padrão do config.py.
         """
 
         token = VerificationTokenService.generate_token(loan.id)
@@ -755,7 +755,9 @@ class PDFService:
         base_url = AppSettingService.get(
             "APP_BASE_URL",
             current_app.config.get("APP_BASE_URL", "http://127.0.0.1:5000"),
-        ).rstrip("/")
+        )
+
+        base_url = str(base_url or "http://127.0.0.1:5000").strip().rstrip("/")
 
         return f"{base_url}/emprestimos/verificar/{token}"
 
