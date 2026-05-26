@@ -10,6 +10,8 @@ from services.loan_service import LoanService
 from services.validation_reminder_service import ValidationReminderService
 from services.backup_service import BackupService
 
+from utils.query_options import loan_full_options
+
 
 main_bp = Blueprint("main_bp", __name__)
 
@@ -62,6 +64,7 @@ def dashboard():
 
     borrowed_loans = (
         Loan.query
+        .options(*loan_full_options())
         .filter(Loan.status.in_(borrowed_statuses))
         .order_by(Loan.created_at.desc())
         .all()
@@ -69,6 +72,7 @@ def dashboard():
 
     pending_approval_loans = (
         Loan.query
+        .options(*loan_full_options())
         .filter_by(status=LoanStatus.PENDENTE_APROVACAO.value)
         .order_by(Loan.created_at.desc())
         .all()
@@ -76,6 +80,7 @@ def dashboard():
 
     candidate_loans = (
         Loan.query
+        .options(*loan_full_options())
         .filter(Loan.status.in_(dashboard_candidate_statuses))
         .order_by(Loan.created_at.desc())
         .all()

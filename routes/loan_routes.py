@@ -35,6 +35,7 @@ from services.auth_service import AuthService
 from services.verification_token_service import VerificationTokenService
 
 from utils.normalize import normalize_name
+from utils.query_options import loan_full_options
 
 
 loan_bp = Blueprint("loan_bp", __name__, url_prefix="/emprestimos")
@@ -167,6 +168,7 @@ def list_loans():
 
     loans_all = (
         query
+        .options(*loan_full_options())
         .order_by(Loan.created_at.desc())
         .all()
     )
@@ -366,7 +368,12 @@ def loan_detail(loan_id: int):
     Exibe os detalhes de um empréstimo.
     """
 
-    loan = Loan.query.get_or_404(loan_id)
+    loan = (
+        Loan.query
+        .options(*loan_full_options())
+        .filter(Loan.id == loan_id)
+        .first_or_404()
+    )
 
     return render_template(
         "loan_detail.html",
@@ -829,6 +836,7 @@ def overdue_report():
 
     loans = (
         Loan.query
+        .options(*loan_full_options())
         .filter(Loan.status == LoanStatus.ATRASADO.value)
         .order_by(Loan.data_prevista_devolucao.asc())
         .all()

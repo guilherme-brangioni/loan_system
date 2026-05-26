@@ -16,6 +16,7 @@ from services.auth_service import AuthService
 
 from utils.form_helpers import get_optional, get_required
 from utils.normalize import normalize_name
+from utils.query_options import loan_item_history_options
 
 
 equipment_bp = Blueprint("equipment_bp", __name__, url_prefix="/itens")
@@ -399,6 +400,7 @@ def item_history(equipment_id: int):
 
     loan_items = (
         LoanItem.query
+        .options(*loan_item_history_options())
         .filter_by(equipment_id=equipment.id)
         .order_by(LoanItem.created_at.desc())
         .all()
