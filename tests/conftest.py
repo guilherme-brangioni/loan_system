@@ -1,11 +1,11 @@
 import os
 import tempfile
-import pytest
 
+import pytest
 from sqlalchemy import text
+
 from app import create_app
 from database.database import db
-
 from models.system_user import SystemUser
 
 
@@ -44,6 +44,7 @@ def app():
                 temp_dir,
                 "inventario_fake.xlsx",
             ),
+            "EXCEL_INVENTORY_SHEET": "Inventario",
             "FIXED_NOTIFICATION_EMAILS_FILE": os.path.join(
                 temp_dir,
                 "fixed_notification_emails.txt",
@@ -57,7 +58,6 @@ def app():
         db.drop_all()
         db.create_all()
 
-        # Força escrita real no arquivo SQLite.
         db.session.execute(text("SELECT 1"))
         db.session.commit()
 
@@ -78,6 +78,7 @@ def app():
 @pytest.fixture()
 def client(app):
     return app.test_client()
+
 
 @pytest.fixture()
 def create_system_user(app):
@@ -135,6 +136,7 @@ def login_user(client, create_system_user):
         )
 
     return _login
+
 
 @pytest.fixture(autouse=True)
 def mock_external_services(monkeypatch):
