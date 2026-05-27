@@ -93,10 +93,29 @@
                     {% endif %}
 
                     {% if current_user.role in ["ADMIN", "OPERADOR"] %}
-                    <a class="nav-link" href="{{ url_for('excel_bp.excel_sync_page') }}">
-                        Base de Dados
-                    </a>
+                    <div class="nav-item dropdown">
+                        <button class="nav-drop-button" type="button">
+                            Base de Dados
+                        </button>
+
+                        <div class="dropdown-menu">
+                            <a href="{{ url_for('excel_bp.excel_sync_page') }}">
+                                Base de Dados
+                            </a>
+
+                            {% if current_user.role == "ADMIN" %}
+                            <a href="{{ url_for('maintenance_bp.maintenance_page') }}">
+                                Backups
+                            </a>
+
+                            <a href="{{ url_for('sync_bp.sync_pending_page') }}">
+                                Sincronização
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
                     {% endif %}
+
 
                     {% if current_user.role == "ADMIN" %}
                     <div class="nav-item dropdown">
@@ -105,14 +124,6 @@
                         </button>
 
                         <div class="dropdown-menu">
-                            <a href="{{ url_for('maintenance_bp.maintenance_page') }}">
-                                Manutenção
-                            </a>
-
-                            <a href="{{ url_for('sync_bp.sync_pending_page') }}">
-                                Sincronização
-                            </a>
-
                             <a href="{{ url_for('settings_bp.settings_page') }}">
                                 Configurações
                             </a>

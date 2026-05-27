@@ -27,41 +27,48 @@
 </section>
 
 {% if current_user and current_user.role in ["ADMIN", "OPERADOR"] %}
-<section class="dashboard-alert-row">
-    <a
-        class="dashboard-small-alert {% if external_pending_count > 0 %}has-pending{% endif %}"
-        href="{{ url_for('external_pending_bp.external_pending_page') }}"
-    >
-        <span class="dashboard-small-alert-number">
-            {{ external_pending_count }}
-        </span>
+<section class="dashboard-action-row">
 
-        <span>
-            Pendências externas
-        </span>
+    <div class="dashboard-action-left">
+        <form
+            method="post"
+            action="{{ url_for('main_bp.check_validation_reminders') }}"
+        >
+            <button type="submit">
+                Verificar pendências e reenviar lembretes
+            </button>
+        </form>
+    </div>
 
-        {% if external_pending_count > 0 %}
-            <small>
-                Processar e-mails, PDFs ou exportações pendentes
-            </small>
-        {% else %}
-            <small>
-                Nenhuma pendência externa ativa
-            </small>
-        {% endif %}
-    </a>
+    {% if current_user and current_user.role in ["ADMIN", "OPERADOR"] %}
+    <div class="dashboard-action-right">
+        <a
+            class="dashboard-small-alert {% if external_pending_count > 0 %}has-pending{% endif %}"
+            href="{{ url_for('external_pending_bp.external_pending_page') }}"
+        >
+            <span class="dashboard-small-alert-number">
+                {{ external_pending_count }}
+            </span>
+
+            <span>
+                Pendências externas
+            </span>
+
+            {% if external_pending_count > 0 %}
+                <small>
+                    Processar e-mails, PDFs ou exportações pendentes
+                </small>
+            {% else %}
+                <small>
+                    Nenhuma pendência externa ativa
+                </small>
+            {% endif %}
+        </a>
+    </div>
+    {% endif %}
+
 </section>
 {% endif %}
-
-<form
-    method="post"
-    action="{{ url_for('main_bp.check_validation_reminders') }}"
-    onsubmit="return confirm('Deseja verificar pendências de validação e reenviar lembretes vencidos?');"
->
-    <button type="submit">
-        Verificar pendências e reenviar lembretes
-    </button>
-</form>
 
 <p class="hint">
     O Dashboard mostra apenas empréstimos ativos, pendentes de aprovação e pendentes de validação.
@@ -131,7 +138,6 @@
 {% else %}
 <p>Nenhum equipamento emprestado no momento.</p>
 {% endif %}
-
 
 <h3>Pendentes de aprovação</h3>
 

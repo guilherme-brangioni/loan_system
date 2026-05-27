@@ -893,12 +893,6 @@ td small {
 }
 
 /* Dashboard - pendências externas */
-.dashboard-alert-row {
-    margin: 8px 0 20px;
-    display: flex;
-    justify-content: flex-end;
-}
-
 .dashboard-small-alert {
     display: inline-flex;
     align-items: center;
@@ -951,4 +945,53 @@ td small {
 .dashboard-small-alert small {
     font-weight: 400;
     opacity: 0.85;
+}
+
+/* Dashboard - linha de ações */
+.dashboard-action-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 16px;
+    margin: 16px 0 24px;
+}
+
+.dashboard-action-left,
+.dashboard-action-right {
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-action-left form {
+    margin: 0;
+}
+
+.dashboard-action-right {
+    justify-content: flex-end;
+}
+
+/* Ajuste fino do botão de pendências externas */
+.dashboard-small-alert {
+    min-height: 42px;
+}
+
+/* Responsivo */
+@media (max-width: 800px) {
+    .dashboard-action-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .dashboard-action-left,
+    .dashboard-action-right {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .dashboard-action-left button,
+    .dashboard-small-alert {
+        width: 100%;
+        justify-content: center;
+    }
 }

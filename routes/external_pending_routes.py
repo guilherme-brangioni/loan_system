@@ -69,3 +69,4 @@ def process_all():
     )
 
     return redirect(url_for("external_pending_bp.external_pending_page"))
+
