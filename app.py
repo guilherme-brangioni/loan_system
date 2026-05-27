@@ -20,6 +20,7 @@ from routes.settings_routes import settings_bp
 from routes.diagnostic_routes import diagnostic_bp
 from routes.external_pending_routes import external_pending_bp
 from routes.approval_routes import approval_bp
+from routes.search_routes import search_bp
 
 
 def create_app(config_override: dict | None = None):
@@ -47,6 +48,7 @@ def create_app(config_override: dict | None = None):
     app.register_blueprint(diagnostic_bp)
     app.register_blueprint(external_pending_bp)
     app.register_blueprint(approval_bp)
+    app.register_blueprint(search_bp)
 
     @app.context_processor
     def inject_current_user():

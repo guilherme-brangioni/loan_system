@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Busca global</h2>
+
+<p class="hint">
+    Pesquise por controle, solicitante, matrícula, equipamento, patrimônio, código interno, código do equipamento ou número de série.
+</p>
+
+<form method="get" action="{{ url_for('search_bp.global_search') }}" class="form-card">
+    <label for="q">Buscar</label>
+
+    <div class="search-row">
+        <input
+            type="text"
+            id="q"
+            name="q"
+            value="{{ q or '' }}"
+            placeholder="Ex.: EMP-2026, EQP-0001, série, patrimônio, solicitante..."
+            autofocus
+        >
+
+        <button type="submit">
+            Buscar
+        </button>
+
+        <a class="button secondary" href="{{ url_for('search_bp.global_search') }}">
+            Limpar
+        </a>
+    </div>
+</form>
+
+{% if q %}
+
+<section class="search-results-summary">
+    <div class="card">
+        <strong>{{ loans|length }}</strong>
+        <span>Empréstimos</span>
+    </div>
+
+    <div class="card">
+        <strong>{{ equipments|length }}</strong>
+        <span>Equipamentos</span>
+    </div>
+
+    <div class="card">
+        <strong>{{ users|length }}</strong>
+        <span>Solicitantes</span>
+    </div>
+</section>
+
+<h3>Empréstimos encontrados</h3>
+
+{% if loans %}
+<table>
+    <thead>
+        <tr>
+            <th>Controle</th>
+            <th>Solicitante</th>
+            <th>Status</th>
+            <th>Previsão devolução</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for loan in loans %}
+        <tr>
+            <td>
+                <strong>{{ loan.numero_controle }}</strong>
+            </td>
+
+            <td>
+                {% if loan.user %}
+                    {{ loan.user.nome }}
+                    <br>
+                    <small>{{ loan.user.matricula or "-" }}</small>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+
+            <td>
+                <span class="status-badge {{ status_badge_class(loan.status) }}">
+                    {{ format_status_label(loan.status) }}
+                </span>
+            </td>
+
+            <td>
+                {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+            </td>
+
+            <td>
+                <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                    Abrir
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum empréstimo encontrado.</p>
+{% endif %}
+
+<h3>Equipamentos encontrados</h3>
+
+{% if equipments %}
+<table>
+    <thead>
+        <tr>
+            <th>Código interno</th>
+            <th>Tipo</th>
+            <th>Fabricante</th>
+            <th>Modelo</th>
+            <th>Patrimônio</th>
+            <th>Cód. Equip.</th>
+            <th>Série</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for equipment in equipments %}
+        <tr>
+            <td>
+                <strong>{{ equipment.codigo_interno or "-" }}</strong>
+            </td>
+
+            <td>{{ equipment.tipo_equipamento or "-" }}</td>
+            <td>{{ equipment.fabricante or "-" }}</td>
+            <td>{{ equipment.modelo or "-" }}</td>
+            <td>{{ equipment.patrimonio or "-" }}</td>
+            <td>{{ equipment.codigo_equipamento or "-" }}</td>
+            <td>{{ equipment.serial or "-" }}</td>
+
+            <td>
+                <span class="status-badge {{ status_badge_class(equipment.status) }}">
+                    {{ format_status_label(equipment.status) }}
+                </span>
+            </td>
+
+            <td>
+                <a href="{{ url_for('equipment_bp.item_history', equipment_id=equipment.id) }}">
+                    Histórico
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum equipamento encontrado.</p>
+{% endif %}
+
+<h3>Solicitantes encontrados</h3>
+
+{% if users %}
+<table>
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Matrícula</th>
+            <th>E-mail</th>
+            <th>Gerência</th>
+            <th>Regional</th>
+            <th>Equipe</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.nome or "-" }}</td>
+            <td>{{ user.matricula or "-" }}</td>
+            <td>{{ user.email or "-" }}</td>
+            <td>{{ user.gerencia or "-" }}</td>
+            <td>{{ user.regional or "-" }}</td>
+            <td>{{ user.equipe or "-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Nenhum solicitante encontrado.</p>
+{% endif %}
+
+{% else %}
+
+<p class="hint">
+    Digite um termo acima para iniciar a busca.
+</p>
+
+{% endif %}
+
+{% endblock %}
