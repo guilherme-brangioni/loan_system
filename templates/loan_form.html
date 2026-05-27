@@ -98,7 +98,7 @@
                                 data-nome="{{ approver_user.nome }}"
                                 data-email="{{ approver_user.email }}"
                                 data-role="{{ approver_user.role }}"
-                                data-matricula="{{ approver_user.matricula if approver_user.matricula is defined else '' }}"
+                                data-matricula="{{ approver_user.matricula or '' }}"
                             >
                                 {{ approver_user.nome }}
                                 —
@@ -109,7 +109,7 @@
                         {% endfor %}
                     </select>
 
-                    <p id="selected-approver-feedback" class="hint">
+                    <p id="selected-approver-feedback" class="hint warning-text">
                         Nenhum aprovador selecionado.
                     </p>
                 </div>
@@ -147,6 +147,7 @@
                     type="text"
                     id="responsavel_entrega_nome"
                     name="responsavel_entrega_nome"
+                    value="{{ current_user.nome if current_user else '' }}"
                     required
                 >
             </div>
@@ -157,6 +158,8 @@
                     type="text"
                     id="responsavel_entrega_matricula"
                     name="responsavel_entrega_matricula"
+                    value="{{ current_user.matricula if current_user and current_user.matricula else '' }}"
+                    required
                 >
             </div>
 
@@ -166,6 +169,7 @@
                     type="email"
                     id="responsavel_entrega_email"
                     name="responsavel_entrega_email"
+                    value="{{ current_user.email if current_user and current_user.email else '' }}"
                     required
                     placeholder="responsavel@empresa.com"
                 >
@@ -233,10 +237,20 @@
         <div class="selected-equipment-header">
             <h4>Equipamentos selecionados</h4>
 
-            <span class="selected-count-badge">
-                <span id="selected-equipment-count">0</span>
-                selecionado(s)
-            </span>
+            <div class="selected-equipment-header-actions">
+                <span class="selected-count-badge">
+                    <span id="selected-equipment-count">0</span>
+                    selecionado(s)
+                </span>
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    onclick="clearSelectedEquipments()"
+                >
+                    Limpar selecionados
+                </button>
+            </div>
         </div>
 
         <div id="selected-equipments" class="selected-equipments">
@@ -495,6 +509,7 @@ function clearEquipmentSearch() {
 
 function validateLoanFormBeforeSubmit() {
     const approverEmail = document.getElementById("approver_email");
+    const approverNome = document.getElementById("approver_nome");
 
     if (!approverEmail || !approverEmail.value.trim()) {
         alert("Selecione um aprovador antes de criar o empréstimo.");
@@ -506,7 +521,15 @@ function validateLoanFormBeforeSubmit() {
         return false;
     }
 
-    return confirm("Confirmar criação da solicitação de empréstimo com os equipamentos selecionados?");
+    const approverText = approverNome && approverNome.value
+        ? approverNome.value
+        : approverEmail.value;
+
+    return confirm(
+        "Confirmar criação da solicitação de empréstimo?\n\n" +
+        `Aprovador: ${approverText}\n` +
+        `Equipamentos selecionados: ${selectedEquipments.size}`
+    );
 }
 
 document.getElementById("equipment_search").addEventListener("keydown", function(event) {
@@ -553,6 +576,21 @@ function setApproverFromSelect() {
 
         feedback.className = "hint success-text";
     }
+}
+
+function clearSelectedEquipments() {
+    if (selectedEquipments.size === 0) {
+        return;
+    }
+
+    const confirmed = confirm("Remover todos os equipamentos selecionados?");
+
+    if (!confirmed) {
+        return;
+    }
+
+    selectedEquipments.clear();
+    renderSelectedEquipments();
 }
 
 renderSelectedEquipments();

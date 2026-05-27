@@ -2011,3 +2011,45 @@ button:disabled {
         width: 100%;
     }
 }
+
+/* =========================================================
+   NOVO EMPRÉSTIMO - AÇÕES DE EQUIPAMENTOS SELECIONADOS
+   ========================================================= */
+
+.selected-equipment-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.selected-equipment-header-actions .secondary-button {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+.success-text {
+    color: #166534;
+    font-weight: 700;
+}
+
+.warning-text {
+    color: #92400e;
+    font-weight: 700;
+}
+
+@media (max-width: 700px) {
+    .selected-equipment-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .selected-equipment-header-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .selected-equipment-header-actions button {
+        width: 100%;
+    }
+}
