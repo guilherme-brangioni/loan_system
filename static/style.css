@@ -1702,3 +1702,163 @@ button:disabled {
     min-width: 125px;
     text-align: center;
 }
+
+/* =========================================================
+   FILTROS - EMPRÉSTIMOS
+   ========================================================= */
+
+.loan-filter-row {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr 1fr;
+    grid-template-areas:
+        "search status validation overdue"
+        "date-start date-end per-page actions";
+
+    gap: 12px;
+    align-items: end;
+}
+
+.filter-search {
+    grid-area: search;
+}
+
+.filter-status {
+    grid-area: status;
+}
+
+.filter-validation {
+    grid-area: validation;
+}
+
+.filter-overdue {
+    grid-area: overdue;
+}
+
+.filter-date-start {
+    grid-area: date-start;
+}
+
+.filter-date-end {
+    grid-area: date-end;
+}
+
+.filter-per-page {
+    grid-area: per-page;
+}
+
+.filter-actions {
+    grid-area: actions;
+
+    display: flex;
+    gap: 8px;
+    align-items: end;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-field label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.filter-field input,
+.filter-field select {
+    width: 100%;
+    min-height: 42px;
+}
+
+.filter-actions button,
+.filter-actions .button {
+    height: 42px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Responsivo */
+@media (max-width: 1000px) {
+    .loan-filter-row {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "search search"
+            "status validation"
+            "overdue per-page"
+            "date-start date-end"
+            "actions actions";
+    }
+
+    .filter-actions {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 700px) {
+    .loan-filter-row {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "search"
+            "status"
+            "validation"
+            "overdue"
+            "date-start"
+            "date-end"
+            "per-page"
+            "actions";
+    }
+
+    .filter-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-actions button,
+    .filter-actions .button {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   USUÁRIOS - FILTROS
+   ========================================================= */
+
+.user-filter-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: end;
+}
+
+.user-filter-search {
+    min-width: 260px;
+}
+
+@media (max-width: 1000px) {
+    .user-filter-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .user-filter-search {
+        grid-column: 1 / -1;
+    }
+
+    .filter-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 700px) {
+    .user-filter-row {
+        grid-template-columns: 1fr;
+    }
+
+    .user-filter-search,
+    .filter-actions {
+        grid-column: auto;
+    }
+}

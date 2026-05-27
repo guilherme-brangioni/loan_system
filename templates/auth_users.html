@@ -10,6 +10,73 @@
     </a>
 </p>
 
+<section class="form-card">
+
+    <h3>Filtros</h3>
+
+    <form method="get" action="{{ url_for('auth_bp.list_users') }}" class="search-form">
+
+        <div class="user-filter-row">
+
+            <div class="filter-field user-filter-search">
+                <label for="q">Buscar</label>
+                <input
+                    type="text"
+                    id="q"
+                    name="q"
+                    value="{{ q or '' }}"
+                    placeholder="Nome, e-mail, matrícula, gerência, regional, equipe..."
+                >
+            </div>
+
+            <div class="filter-field">
+                <label for="role">Perfil</label>
+                <select id="role" name="role">
+                    <option value="">Todos</option>
+
+                    {% for role in roles %}
+                        <option value="{{ role }}" {% if role_filter == role %}selected{% endif %}>
+                            {{ role }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="active">Status</label>
+                <select id="active" name="active">
+                    <option value="">Todos</option>
+                    <option value="ATIVO" {% if active_filter == "ATIVO" %}selected{% endif %}>
+                        Ativos
+                    </option>
+                    <option value="INATIVO" {% if active_filter == "INATIVO" %}selected{% endif %}>
+                        Inativos
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit">
+                    Filtrar
+                </button>
+
+                <a class="button secondary" href="{{ url_for('auth_bp.list_users') }}">
+                    Limpar
+                </a>
+            </div>
+
+        </div>
+
+    </form>
+
+</section>
+
+<p class="hint">
+    Total encontrado:
+    <strong>{{ users|length }}</strong>
+</p>
+
+{% if users %}
 <table>
     <thead>
         <tr>
@@ -19,24 +86,44 @@
             <th>Gerência</th>
             <th>Regional</th>
             <th>Equipe</th>
-            <th>Status</th>
             <th>Perfil</th>
-            <th>Ativo</th>
-            <th>Último login</th>
+            <th>Status</th>
+            <th>Senha</th>
             <th>Ações</th>
-            <th></th>
         </tr>
     </thead>
 
     <tbody>
         {% for user in users %}
         <tr>
-            <td><strong>{{ user.nome }}</strong></td>
-            <td>{{ user.email }}</td>
+            <td>
+                <strong>{{ user.nome or "-" }}</strong>
+            </td>
+
+            <td>{{ user.email or "-" }}</td>
             <td>{{ user.matricula or "-" }}</td>
             <td>{{ user.gerencia or "-" }}</td>
             <td>{{ user.regional or "-" }}</td>
             <td>{{ user.equipe or "-" }}</td>
+
+            <td>
+                <span class="status-badge status-info">
+                    {{ user.role or "-" }}
+                </span>
+            </td>
+
+            <td>
+                {% if user.active %}
+                    <span class="status-badge status-success">
+                        Ativo
+                    </span>
+                {% else %}
+                    <span class="status-badge status-danger">
+                        Inativo
+                    </span>
+                {% endif %}
+            </td>
+
             <td>
                 {% if user.must_change_password %}
                     <span class="status-badge status-warning">
@@ -48,12 +135,7 @@
                     </span>
                 {% endif %}
             </td>
-            <td>{{ user.role }}</td>
-            <td>{{ "Sim" if user.active else "Não" }}</td>
-            <td>
-                {{ user.last_login_at.strftime("%d/%m/%Y %H:%M") if user.last_login_at else "-" }}
-            </td>
-            
+
             <td>
                 <div class="user-actions">
 
@@ -80,5 +162,8 @@
         {% endfor %}
     </tbody>
 </table>
+{% else %}
+<p>Nenhum usuário encontrado com os filtros selecionados.</p>
+{% endif %}
 
 {% endblock %}

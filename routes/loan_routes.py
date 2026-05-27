@@ -573,22 +573,25 @@ def return_items(loan_id: int):
                 devolvido_por=devolvido_por,
             )
 
-            ExternalPendingService.enqueue_loan_movement(
-                loan_id=loan.id,
-                movement_type="DEVOLUCAO_ITEM",
-                performed_by=devolvido_por,
-                notes="Devolução de item registrada.",
-                created_by=devolvido_por,
-            )
-
-            ExternalPendingService.enqueue_return_confirmation_email(
+            process_result = ExternalPendingService.enqueue_and_process_return_pendings(
                 loan_id=loan.id,
                 returned_by=devolvido_por,
                 return_type="DEVOLUCAO_ITEM",
                 created_by=devolvido_por,
+                source_item_id=loan_item_id,
             )
 
-            flash("Item devolvido com sucesso.", "success")
+            if process_result["failed"] > 0:
+                flash(
+                    "Item marcado como devolvido, mas uma ou mais pendências externas falharam. "
+                    "Verifique a tela Pendências externas.",
+                    "warning",
+                )
+            else:
+                flash(
+                    "Item marcado como devolvido e pendências externas processadas com sucesso.",
+                    "success",
+                )
 
             return redirect(
                 url_for("loan_bp.loan_detail", loan_id=loan_id)
@@ -670,20 +673,25 @@ def return_all_items(loan_id: int):
             devolvido_por=devolvido_por,
         )
 
-        ExternalPendingService.enqueue_loan_movement(
-            loan_id=loan.id,
-            movement_type="DEVOLUCAO_TOTAL",
-            performed_by=devolvido_por,
-            notes="Devolução total registrada.",
-            created_by=devolvido_por,
-        )
-
-        ExternalPendingService.enqueue_return_confirmation_email(
+        process_result = ExternalPendingService.enqueue_and_process_return_pendings(
             loan_id=loan.id,
             returned_by=devolvido_por,
             return_type="DEVOLUCAO_TOTAL",
             created_by=devolvido_por,
+            source_item_id=None,
         )
+
+        if process_result["failed"] > 0:
+            flash(
+                "Empréstimo marcado como devolvido, mas uma ou mais pendências externas falharam. "
+                "Verifique a tela Pendências externas.",
+                "warning",
+            )
+        else:
+            flash(
+                "Empréstimo marcado como devolvido e pendências externas processadas com sucesso.",
+                "success",
+            )
 
         flash("Empréstimo marcado como devolvido com sucesso.", "success")
 

@@ -129,16 +129,58 @@ def setup_first_admin():
 @role_required(UserRole.ADMIN.value)
 def list_users():
     """
-    Lista usuários do sistema.
+    Lista usuários do sistema com filtros.
     """
 
-    users = SystemUser.query.order_by(
-        SystemUser.nome.asc()
-    ).all()
+    q = request.args.get("q", "").strip()
+    role_filter = request.args.get("role", "").strip().upper()
+    active_filter = request.args.get("active", "").strip()
+    password_filter = request.args.get("password", "").strip()
+
+    query = SystemUser.query
+
+    if q:
+        pattern = f"%{q}%"
+
+        query = query.filter(
+            (SystemUser.nome.ilike(pattern))
+            | (SystemUser.email.ilike(pattern))
+            | (SystemUser.matricula.ilike(pattern))
+            | (SystemUser.telefone.ilike(pattern))
+            | (SystemUser.gerencia.ilike(pattern))
+            | (SystemUser.regional.ilike(pattern))
+            | (SystemUser.equipe.ilike(pattern))
+        )
+
+    if role_filter:
+        query = query.filter(SystemUser.role == role_filter)
+
+    if active_filter == "ATIVO":
+        query = query.filter(SystemUser.active.is_(True))
+
+    elif active_filter == "INATIVO":
+        query = query.filter(SystemUser.active.is_(False))
+
+    if password_filter == "TROCA_PENDENTE":
+        query = query.filter(SystemUser.must_change_password.is_(True))
+
+    elif password_filter == "NORMAL":
+        query = query.filter(SystemUser.must_change_password.is_(False))
+
+    users = (
+        query
+        .order_by(SystemUser.nome.asc())
+        .all()
+    )
 
     return render_template(
         "auth_users.html",
         users=users,
+        q=q,
+        role_filter=role_filter,
+        active_filter=active_filter,
+        password_filter=password_filter,
+        roles=[role.value for role in UserRole],
     )
 
 

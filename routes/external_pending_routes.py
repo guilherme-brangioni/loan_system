@@ -119,3 +119,26 @@ def process_all():
     )
 
     return redirect(url_for("external_pending_bp.external_pending_page"))
+
+@external_pending_bp.route("/processar-todas-dashboard", methods=["POST"])
+@role_required(UserRole.ADMIN.value, UserRole.OPERADOR.value)
+def process_all_from_dashboard():
+    """
+    Processa pendências externas e volta para o Dashboard.
+    """
+
+    performed_by = AuthService.get_current_user_display_name()
+
+    result = ExternalPendingService.process_all_active(
+        performed_by=performed_by,
+    )
+
+    flash(
+        "Pendências externas processadas. "
+        f"Total: {result['total']} | "
+        f"Sucesso: {result['success']} | "
+        f"Falhas: {result['failed']}",
+        "success" if result["failed"] == 0 else "warning",
+    )
+
+    return redirect(url_for("main_bp.dashboard"))

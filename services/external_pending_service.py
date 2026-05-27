@@ -117,17 +117,26 @@ class ExternalPendingService:
         returned_by: str,
         return_type: str,
         created_by: str = "SISTEMA",
+        source_item_id: int | None = None,
     ) -> ExternalPending:
+        payload: dict[str, Any] = {
+            "returned_by": returned_by,
+            "return_type": return_type,
+        }
+
+        dedupe_key = f"EMAIL_RETURN:{return_type}:{loan_id}:{returned_by}"
+
+        if source_item_id is not None:
+            payload["source_item_id"] = source_item_id
+            dedupe_key = f"{dedupe_key}:ITEM:{source_item_id}"
+
         return ExternalPendingService.create_pending(
             action=ExternalPendingService.ACTION_SEND_RETURN_CONFIRMATION_EMAIL,
             entity_type="LOAN",
             entity_id=loan_id,
-            payload={
-                "returned_by": returned_by,
-                "return_type": return_type,
-            },
+            payload=payload,
             created_by=created_by,
-            dedupe_key=f"EMAIL_RETURN:{return_type}:{loan_id}:{returned_by}",
+            dedupe_key=dedupe_key,
         )
 
     @staticmethod
@@ -137,18 +146,74 @@ class ExternalPendingService:
         performed_by: str = "",
         notes: str = "",
         created_by: str = "SISTEMA",
+        source_item_id: int | None = None,
     ) -> ExternalPending:
+        payload: dict[str, Any] = {
+            "movement_type": movement_type,
+            "performed_by": performed_by,
+            "notes": notes,
+        }
+
+        dedupe_key = f"MOVEMENT:{movement_type}:{loan_id}"
+
+        if source_item_id is not None:
+            payload["source_item_id"] = source_item_id
+            dedupe_key = f"{dedupe_key}:ITEM:{source_item_id}"
+
         return ExternalPendingService.create_pending(
             action=ExternalPendingService.ACTION_EXPORT_LOAN_MOVEMENT,
             entity_type="LOAN",
             entity_id=loan_id,
-            payload={
-                "movement_type": movement_type,
-                "performed_by": performed_by,
-                "notes": notes,
-            },
+            payload=payload,
             created_by=created_by,
-            dedupe_key=f"MOVEMENT:{movement_type}:{loan_id}",
+            dedupe_key=dedupe_key,
+        )
+    
+    @staticmethod
+    def enqueue_and_process_return_pendings(
+        loan_id: int,
+        returned_by: str,
+        return_type: str,
+        created_by: str = "SISTEMA",
+        source_item_id: int | None = None,
+    ) -> dict:
+        """
+        Cria e processa imediatamente as pendências externas de devolução.
+
+        Usado em:
+        - devolução parcial;
+        - devolução total.
+
+        Se alguma pendência falhar, ela permanece como ERRO.
+        """
+
+        pending_movement = ExternalPendingService.enqueue_loan_movement(
+            loan_id=loan_id,
+            movement_type=return_type,
+            performed_by=returned_by,
+            notes=(
+                "Devolução total registrada."
+                if return_type == "DEVOLUCAO_TOTAL"
+                else "Devolução de item registrada."
+            ),
+            created_by=created_by,
+            source_item_id=source_item_id,
+        )
+
+        pending_email = ExternalPendingService.enqueue_return_confirmation_email(
+            loan_id=loan_id,
+            returned_by=returned_by,
+            return_type=return_type,
+            created_by=created_by,
+            source_item_id=source_item_id,
+        )
+
+        return ExternalPendingService.process_pendings(
+            pendings=[
+                pending_movement,
+                pending_email,
+            ],
+            performed_by=returned_by,
         )
 
     @staticmethod
@@ -404,3 +469,46 @@ class ExternalPendingService:
             notes=notes,
         )
     
+    @staticmethod
+    def process_pendings(
+        pendings: list[ExternalPending],
+        performed_by: str = "SISTEMA",
+    ) -> dict:
+        """
+        Processa uma lista específica de pendências.
+
+        Usado quando queremos processar imediatamente apenas as pendências
+        criadas por uma ação específica.
+        """
+
+        total = 0
+        success = 0
+        failed = 0
+
+        processed_ids = set()
+
+        for pending in pendings:
+            if not pending:
+                continue
+
+            if pending.id in processed_ids:
+                continue
+
+            processed_ids.add(pending.id)
+            total += 1
+
+            result = ExternalPendingService.process_pending(
+                pending=pending,
+                performed_by=performed_by,
+            )
+
+            if result.get("success"):
+                success += 1
+            else:
+                failed += 1
+
+        return {
+            "total": total,
+            "success": success,
+            "failed": failed,
+        }

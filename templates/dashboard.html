@@ -63,6 +63,18 @@
                     Nenhuma pendência externa ativa
                 </small>
             {% endif %}
+
+            {% if external_pending_count > 0 and current_user and current_user.role in ["ADMIN", "OPERADOR"] %}
+            <form
+                method="post"
+                action="{{ url_for('external_pending_bp.process_all_from_dashboard') }}"
+                onsubmit="return confirm('Processar todas as pendências externas ativas agora?');"
+            >
+                <button type="submit" class="secondary-button">
+                    Processar pendências externas
+                </button>
+            </form>
+            {% endif %}
         </a>
     </div>
     {% endif %}

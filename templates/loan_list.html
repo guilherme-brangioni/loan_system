@@ -7,66 +7,93 @@
 <form method="get" action="{{ url_for('loan_bp.list_loans') }}" class="search-form">
     <label for="q">Buscar empréstimo</label>
 
-    <div class="search-row">
-        <input
-            type="text"
-            id="q"
-            name="q"
-            value="{{ search_text or '' }}"
-            placeholder="Controle, solicitante, matrícula, equipamento, série, código..."
-        >
+    <div class="search-row loan-filter-row">
 
-        <select name="status">
-            <option value="">Todos os status</option>
-            {% for status in status_options %}
-                <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>
-                    {{ format_status_label(status) }}
+        <div class="filter-field filter-search">
+            <label for="q">Texto</label>
+            <input
+                type="text"
+                id="q"
+                name="q"
+                value="{{ search_text or '' }}"
+                placeholder="Controle, solicitante, matrícula, equipamento..."
+            >
+        </div>
+
+        <div class="filter-field filter-status">
+            <label for="status">Status</label>
+            <select id="status" name="status">
+                <option value="">Todos os status</option>
+                {% for status in status_options %}
+                    <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>
+                        {{ format_status_label(status) }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-field filter-validation">
+            <label for="validacao">Validação</label>
+            <select id="validacao" name="validacao">
+                <option value="">Todas</option>
+                <option value="PENDENTE" {% if validation_filter == "PENDENTE" %}selected{% endif %}>
+                    Pendentes
                 </option>
-            {% endfor %}
-        </select>
+                <option value="VALIDADO" {% if validation_filter == "VALIDADO" %}selected{% endif %}>
+                    Validados
+                </option>
+            </select>
+        </div>
 
-        <select name="validacao">
-            <option value="">Validação</option>
-            <option value="PENDENTE" {% if validation_filter == "PENDENTE" %}selected{% endif %}>
-                Pendentes
-            </option>
-            <option value="VALIDADO" {% if validation_filter == "VALIDADO" %}selected{% endif %}>
-                Validados
-            </option>
-        </select>
+        <div class="filter-field filter-overdue">
+            <label for="atrasados">Atraso</label>
+            <select id="atrasados" name="atrasados">
+                <option value="">Todos</option>
+                <option value="SIM" {% if overdue_filter == "SIM" %}selected{% endif %}>
+                    Somente atrasados
+                </option>
+            </select>
+        </div>
 
-        <select name="atrasados">
-            <option value="">Atraso</option>
-            <option value="SIM" {% if overdue_filter == "SIM" %}selected{% endif %}>
-                Somente atrasados
-            </option>
-        </select>
+        <div class="filter-field filter-date-start">
+            <label for="data_inicio">Data de Empréstimo</label>
+            <input
+                type="date"
+                id="data_inicio"
+                name="data_inicio"
+                value="{{ date_from_text or '' }}"
+            >
+        </div>
 
-        <input
-            type="date"
-            name="data_inicio"
-            value="{{ date_from_text or '' }}"
-        >
+        <div class="filter-field filter-date-end">
+            <label for="data_fim">Data de Devolução</label>
+            <input
+                type="date"
+                id="data_fim"
+                name="data_fim"
+                value="{{ date_to_text or '' }}"
+            >
+        </div>
 
-        <input
-            type="date"
-            name="data_fim"
-            value="{{ date_to_text or '' }}"
-        >
+        <div class="filter-field filter-per-page">
+            <label for="per_page">Itens por página</label>
+            <select id="per_page" name="per_page">
+                <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
+            </select>
+        </div>
 
-        <select name="per_page">
-            <option value="25" {% if per_page == 25 %}selected{% endif %}>25</option>
-            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
-            <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
-        </select>
+        <div class="filter-actions">
+            <button type="submit">
+                Filtrar
+            </button>
 
-        <button type="submit">
-            Filtrar
-        </button>
+            <a class="button secondary" href="{{ url_for('loan_bp.list_loans') }}">
+                Limpar
+            </a>
+        </div>
 
-        <a class="button secondary" href="{{ url_for('loan_bp.list_loans') }}">
-            Limpar
-        </a>
     </div>
 </form>
 
