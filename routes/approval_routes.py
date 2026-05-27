@@ -14,14 +14,38 @@ approval_bp = Blueprint(
 @approval_bp.route("/")
 def my_approvals():
     """
-    Lista aprovações pendentes direcionadas ao usuário logado.
+    Lista aprovações direcionadas ao usuário logado.
     """
 
-    loans = ApprovalService.get_pending_approvals_for_current_user()
+    status_filter = request.args.get(
+        "status",
+        "PENDENTE_APROVACAO",
+    ).strip()
+
+    search_text = request.args.get("q", "").strip()
+
+    loans = ApprovalService.get_approvals_for_current_user(
+        status_filter=status_filter,
+        search_text=search_text,
+    )
+
+    pending_count = ApprovalService.count_pending_for_current_user()
+
+    status_options = [
+        "PENDENTE_APROVACAO",
+        "APROVADO",
+        "REJEITADO",
+        "RETIRADO",
+        "FINALIZADO",
+    ]
 
     return render_template(
         "my_approvals.html",
         loans=loans,
+        pending_count=pending_count,
+        status_filter=status_filter,
+        search_text=search_text,
+        status_options=status_options,
     )
 
 

@@ -55,14 +55,18 @@
                 </select>
             </div>
 
-            <div class="filter-actions">
-                <button type="submit">
-                    Filtrar
-                </button>
+            <div class="filter-field user-filter-actions-field">
+                <label>&nbsp;</label>
 
-                <a class="button secondary" href="{{ url_for('auth_bp.list_users') }}">
-                    Limpar
-                </a>
+                <div class="user-filter-actions">
+                    <button type="submit">
+                        Filtrar
+                    </button>
+
+                    <a class="button secondary" href="{{ url_for('auth_bp.list_users') }}">
+                        Limpar
+                    </a>
+                </div>
             </div>
 
         </div>

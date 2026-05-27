@@ -5,8 +5,94 @@
 <h2>Minhas aprovações</h2>
 
 <p class="hint">
-    Esta tela mostra solicitações de empréstimo pendentes direcionadas ao seu e-mail de usuário.
+    Esta tela mostra solicitações de empréstimo direcionadas ao seu usuário.
+    Usuários ADMIN visualizam todas as aprovações.
 </p>
+
+<section class="attention-section">
+
+    <div class="attention-header">
+        <h3>Resumo</h3>
+        <span>{{ pending_count }} pendente(s)</span>
+    </div>
+
+    <div class="attention-grid">
+        <div class="attention-card attention-warning">
+            <div class="attention-count">
+                {{ pending_count }}
+            </div>
+
+            <div class="attention-content">
+                <strong>Aprovações pendentes</strong>
+                <small>Solicitações aguardando análise.</small>
+            </div>
+        </div>
+
+        <div class="attention-card attention-info">
+            <div class="attention-count">
+                {{ loans|length }}
+            </div>
+
+            <div class="attention-content">
+                <strong>Resultado filtrado</strong>
+                <small>Quantidade exibida na tabela abaixo.</small>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section class="form-card">
+
+    <h3>Filtros</h3>
+
+    <form method="get" action="{{ url_for('approval_bp.my_approvals') }}" class="search-form">
+
+        <div class="approval-filter-row">
+
+            <div class="filter-field approval-filter-search">
+                <label for="q">Buscar</label>
+                <input
+                    type="text"
+                    id="q"
+                    name="q"
+                    value="{{ search_text or '' }}"
+                    placeholder="Controle, solicitante, matrícula ou e-mail..."
+                >
+            </div>
+
+            <div class="filter-field">
+                <label for="status">Status</label>
+                <select id="status" name="status">
+                    <option value="">Todos</option>
+
+                    {% for status in status_options %}
+                        <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>
+                            {{ format_status_label(status) }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-field approval-filter-actions-field">
+                <label>&nbsp;</label>
+
+                <div class="approval-filter-actions">
+                    <button type="submit">
+                        Filtrar
+                    </button>
+
+                    <a class="button secondary" href="{{ url_for('approval_bp.my_approvals') }}">
+                        Limpar
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </form>
+
+</section>
 
 {% if loans %}
 <table>
@@ -14,6 +100,7 @@
         <tr>
             <th>Controle</th>
             <th>Solicitante</th>
+            <th>Aprovador</th>
             <th>Equipamento(s)</th>
             <th>Data empréstimo</th>
             <th>Previsão devolução</th>
@@ -26,48 +113,76 @@
         {% for loan in loans %}
         <tr>
             <td>
-                <strong>{{ loan.numero_controle }}</strong>
+                <div class="copy-control-wrapper">
+                    <strong>{{ loan.numero_controle }}</strong>
+
+                    <button
+                        type="button"
+                        class="copy-control-button"
+                        onclick="copyToClipboard('{{ loan.numero_controle }}', 'copy-feedback-approval-{{ loan.id }}')"
+                    >
+                        Copiar
+                    </button>
+
+                    <span
+                        id="copy-feedback-approval-{{ loan.id }}"
+                        class="copy-feedback"
+                    ></span>
+                </div>
             </td>
 
             <td>
-                {{ loan.user.nome if loan.user else "-" }}
-                <br>
-                <small>
-                    Matrícula:
-                    {{ loan.user.matricula if loan.user else "-" }}
-                </small>
-                <br>
-                <small>
-                    {{ loan.user.email if loan.user else "-" }}
-                </small>
+                {% if loan.user %}
+                    {{ loan.user.nome }}
+                    <br>
+                    <small>Matrícula: {{ loan.user.matricula or "-" }}</small>
+                    <br>
+                    <small>{{ loan.user.email or "-" }}</small>
+                {% else %}
+                    -
+                {% endif %}
             </td>
 
             <td>
-                {% for item in loan.items %}
-                    {% if item.equipment %}
-                        <div class="loan-equipment-summary">
-                            <strong>
-                                {{ item.equipment.tipo_equipamento or "EQUIPAMENTO" }}
-                            </strong>
-                            <br>
+                {% if loan.approver %}
+                    {{ loan.approver.nome or "-" }}
+                    <br>
+                    <small>{{ loan.approver.email or "-" }}</small>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
 
-                            {{ item.equipment.fabricante or "-" }}
-                            {{ item.equipment.modelo or "-" }}
-                            <br>
+            <td>
+                {% if loan.items %}
+                    {% for item in loan.items %}
+                        {% if item.equipment %}
+                            <div class="loan-equipment-summary">
+                                <strong>
+                                    {{ item.equipment.tipo_equipamento or "EQUIPAMENTO" }}
+                                </strong>
+                                <br>
 
-                            <small>
-                                Cód. Interno:
-                                {{ item.equipment.codigo_interno or "-" }}
-                                |
-                                Patrimônio:
-                                {{ item.equipment.patrimonio or "-" }}
-                                |
-                                Série:
-                                {{ item.equipment.serial or "-" }}
-                            </small>
-                        </div>
-                    {% endif %}
-                {% endfor %}
+                                {{ item.equipment.fabricante or "-" }}
+                                {{ item.equipment.modelo or "-" }}
+                                <br>
+
+                                <small>
+                                    Cód. Interno:
+                                    {{ item.equipment.codigo_interno or "-" }}
+                                    |
+                                    Patrimônio:
+                                    {{ item.equipment.patrimonio or "-" }}
+                                    |
+                                    Série:
+                                    {{ item.equipment.serial or "-" }}
+                                </small>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    -
+                {% endif %}
             </td>
 
             <td>
@@ -85,7 +200,8 @@
             </td>
 
             <td>
-                <div class="actions">
+                <div style="text-align: center;" class="approval-actions">
+
                     <a
                         class="button secondary"
                         href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}"
@@ -93,32 +209,39 @@
                         Abrir
                     </a>
 
-                    <form
-                        method="post"
-                        action="{{ url_for('approval_bp.approve_loan', loan_id=loan.id) }}"
-                        onsubmit="return confirm('Confirmar aprovação do empréstimo {{ loan.numero_controle }}?');"
-                    >
-                        <button type="submit">
-                            Aprovar
-                        </button>
-                    </form>
-
-                    <form
-                        method="post"
-                        action="{{ url_for('approval_bp.reject_loan', loan_id=loan.id) }}"
-                        onsubmit="return confirm('Confirmar rejeição do empréstimo {{ loan.numero_controle }}?');"
-                    >
-                        <input
-                            type="text"
-                            name="reason"
-                            placeholder="Motivo da rejeição"
-                            required
+                    {% if loan.status == "PENDENTE_APROVACAO" %}
+                        <form
+                            method="post"
+                            action="{{ url_for('approval_bp.approve_loan', loan_id=loan.id) }}"
+                            onsubmit="return confirm('Confirmar aprovação do empréstimo {{ loan.numero_controle }}?');"
                         >
+                            <button type="submit">
+                                Aprovar
+                            </button>
+                        </form>
 
-                        <button type="submit" class="danger-button">
-                            Rejeitar
-                        </button>
-                    </form>
+                        <form
+                            method="post"
+                            action="{{ url_for('approval_bp.reject_loan', loan_id=loan.id) }}"
+                            onsubmit="return confirm('Confirmar rejeição do empréstimo {{ loan.numero_controle }}?');"
+                        >
+                            <input
+                                type="text"
+                                name="reason"
+                                placeholder="Motivo"
+                                required
+                            >
+
+                            <button type="submit" class="danger-button">
+                                Rejeitar
+                            </button>
+                        </form>
+                    {% else %}
+                        <span class="hint">
+                            Sem ação pendente
+                        </span>
+                    {% endif %}
+
                 </div>
             </td>
         </tr>
@@ -126,7 +249,7 @@
     </tbody>
 </table>
 {% else %}
-<p>Nenhuma solicitação pendente de aprovação para seu usuário.</p>
+<p>Nenhuma aprovação encontrada com os filtros selecionados.</p>
 {% endif %}
 
 {% endblock %}

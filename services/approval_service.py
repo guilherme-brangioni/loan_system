@@ -272,3 +272,67 @@ class ApprovalService:
         )
 
         return loan
+    
+    @staticmethod
+    def get_approvals_for_current_user(
+        status_filter: str = "PENDENTE_APROVACAO",
+        search_text: str = "",
+    ):
+        """
+        Lista aprovações direcionadas ao usuário logado.
+
+        ADMIN enxerga todas.
+        Demais usuários enxergam apenas empréstimos onde:
+        e-mail do usuário logado = e-mail do aprovador.
+
+        Permite filtro por status e busca por controle/solicitante.
+        """
+
+        current_user = AuthService.get_current_user()
+
+        if not current_user:
+            return []
+
+        query = (
+            Loan.query
+            .options(*loan_full_options())
+            .join(Approver, Loan.approver_id == Approver.id)
+        )
+
+        if current_user.role != UserRole.ADMIN.value:
+            current_email = ApprovalService._normalize_email(current_user.email)
+
+            if not current_email:
+                return []
+
+            query = query.filter(func.lower(Approver.email) == current_email)
+
+        if status_filter:
+            query = query.filter(Loan.status == status_filter)
+
+        search_text = str(search_text or "").strip()
+
+        if search_text:
+            from models.user import User
+
+            pattern = f"%{search_text}%"
+
+            query = (
+                query
+                .outerjoin(User, Loan.user_id == User.id)
+                .filter(
+                    (Loan.numero_controle.ilike(pattern))
+                    | (Loan.status.ilike(pattern))
+                    | (User.nome.ilike(pattern))
+                    | (User.matricula.ilike(pattern))
+                    | (User.email.ilike(pattern))
+                    | (Approver.nome.ilike(pattern))
+                    | (Approver.email.ilike(pattern))
+                )
+            )
+
+        return (
+            query
+            .order_by(Loan.created_at.desc())
+            .all()
+        )
