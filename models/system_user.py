@@ -27,6 +27,16 @@ class SystemUser(db.Model):
 
     active = db.Column(db.Boolean, default=True)
 
+    must_change_password = db.Column(
+        db.Boolean,
+        nullable=False,
+        default=False,
+    )
+
+    temporary_password_generated_at = db.Column(db.DateTime)
+
+    password_changed_at = db.Column(db.DateTime)
+
     last_login_at = db.Column(db.DateTime)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

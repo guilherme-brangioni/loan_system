@@ -1,13 +1,42 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from datetime import datetime
+
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+
+from sqlalchemy import func
 
 from database.database import db
 from enums.user_role import UserRole
 from models.system_user import SystemUser
+from services.app_setting_service import AppSettingService
 from services.auth_service import AuthService
+from services.password_reset_service import PasswordResetService
 from utils.auth_decorators import role_required
 
 
 auth_bp = Blueprint("auth_bp", __name__, url_prefix="/auth")
+
+
+def build_login_url() -> str:
+    """
+    Monta URL absoluta de login usando APP_BASE_URL.
+    """
+
+    base_url = AppSettingService.get(
+        "APP_BASE_URL",
+        current_app.config.get("APP_BASE_URL", "http://127.0.0.1:5000"),
+    )
+
+    base_url = str(base_url or "http://127.0.0.1:5000").strip().rstrip("/")
+
+    return f"{base_url}{url_for('auth_bp.login')}"
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -29,6 +58,14 @@ def login():
             )
 
             AuthService.login_user(user)
+
+            if getattr(user, "must_change_password", False):
+                flash(
+                    "Você está usando uma senha temporária. Crie uma nova senha para continuar.",
+                    "warning",
+                )
+
+                return redirect(url_for("auth_bp.force_change_password"))
 
             flash("Login realizado com sucesso.", "success")
 
@@ -181,6 +218,8 @@ def edit_user(user_id: int):
 
             if new_password:
                 user.set_password(new_password)
+                user.must_change_password = False
+                user.password_changed_at = datetime.utcnow()
 
             db.session.commit()
 
@@ -199,6 +238,48 @@ def edit_user(user_id: int):
     )
 
 
+@auth_bp.route("/esqueci-senha", methods=["GET", "POST"])
+def forgot_password():
+    """
+    Solicita reset de senha.
+
+    Por segurança, a resposta visual é genérica.
+    """
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+
+        user = (
+            SystemUser.query
+            .filter(func.lower(SystemUser.email) == email)
+            .first()
+        )
+
+        if user and user.active:
+            result = PasswordResetService.reset_password_and_send_email(
+                user=user,
+                login_url=build_login_url(),
+                performed_by="RESET_SOLICITADO_PELO_USUARIO",
+            )
+
+            if not result.get("success"):
+                flash(
+                    "Não foi possível enviar a senha temporária. Verifique a configuração de e-mail ou contate o administrador.",
+                    "error",
+                )
+
+                return redirect(url_for("auth_bp.forgot_password"))
+
+        flash(
+            "Se o e-mail estiver cadastrado e ativo, uma senha temporária será enviada.",
+            "success",
+        )
+
+        return redirect(url_for("auth_bp.login"))
+
+    return render_template("auth_forgot_password.html")
+
+
 @auth_bp.route("/alterar-senha", methods=["GET", "POST"])
 def change_password():
     """
@@ -208,6 +289,7 @@ def change_password():
     user = AuthService.get_current_user()
 
     if not user:
+        flash("Faça login para alterar sua senha.", "error")
         return redirect(url_for("auth_bp.login"))
 
     if request.method == "POST":
@@ -221,11 +303,100 @@ def change_password():
                 confirm_password=form_data.get("confirm_password", ""),
             )
 
+            user.must_change_password = False
+            user.password_changed_at = datetime.utcnow()
+
+            db.session.commit()
+
             flash("Senha alterada com sucesso.", "success")
 
             return redirect(url_for("main_bp.dashboard"))
 
         except Exception as exc:
+            db.session.rollback()
             flash(str(exc), "error")
 
     return render_template("auth_change_password.html")
+
+
+@auth_bp.route("/alterar-senha-obrigatoria", methods=["GET", "POST"])
+def force_change_password():
+    """
+    Tela obrigatória após login com senha temporária.
+    """
+
+    current_user = AuthService.get_current_user()
+
+    if not current_user:
+        flash("Faça login para continuar.", "error")
+        return redirect(url_for("auth_bp.login"))
+
+    if not getattr(current_user, "must_change_password", False):
+        return redirect(url_for("main_bp.dashboard"))
+
+    if request.method == "POST":
+        try:
+            new_password = request.form.get("new_password", "")
+            confirm_password = request.form.get("confirm_password", "")
+
+            if len(new_password) < 6:
+                raise ValueError("A nova senha deve ter pelo menos 6 caracteres.")
+
+            if new_password != confirm_password:
+                raise ValueError("A confirmação da senha não confere.")
+
+            current_user.set_password(new_password)
+            current_user.must_change_password = False
+            current_user.password_changed_at = datetime.utcnow()
+
+            db.session.commit()
+
+            flash("Senha alterada com sucesso. Acesso liberado.", "success")
+
+            return redirect(url_for("main_bp.dashboard"))
+
+        except Exception as exc:
+            db.session.rollback()
+            flash(str(exc), "error")
+
+    return render_template("auth_force_change_password.html")
+
+
+@auth_bp.route("/usuarios/<int:user_id>/resetar-senha", methods=["POST"])
+@role_required(UserRole.ADMIN.value)
+def reset_user_password(user_id: int):
+    """
+    ADMIN gera senha temporária para um usuário.
+    """
+
+    user = db.session.get(SystemUser, user_id)
+
+    if not user:
+        flash("Usuário não encontrado.", "error")
+        return redirect(url_for("auth_bp.list_users"))
+
+    if not user.active:
+        flash("Não é possível resetar senha de usuário inativo.", "error")
+        return redirect(url_for("auth_bp.list_users"))
+
+    performed_by = AuthService.get_current_user_display_name()
+
+    result = PasswordResetService.reset_password_and_send_email(
+        user=user,
+        login_url=build_login_url(),
+        performed_by=performed_by,
+    )
+
+    if result.get("success"):
+        flash(
+            f"Senha temporária enviada para {user.email}.",
+            "success",
+        )
+    else:
+        flash(
+            "Falha ao resetar senha: "
+            + result.get("error", "Erro desconhecido."),
+            "error",
+        )
+
+    return redirect(url_for("auth_bp.list_users"))

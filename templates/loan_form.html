@@ -72,28 +72,62 @@
             <div>
                 <h3>Aprovador</h3>
                 <p>
-                    O e-mail do aprovador será usado para exibir a solicitação no menu
-                    Empréstimos &gt; Aprovações do usuário.
+                    Selecione um usuário ativo com perfil ADMIN ou OPERADOR.
+                    A solicitação aparecerá no menu Empréstimos &gt; Aprovações desse usuário.
                 </p>
             </div>
         </div>
 
-        <div class="form-grid-3">
-            <div>
-                <label for="approver_nome">Nome do aprovador *</label>
-                <input type="text" id="approver_nome" name="approver_nome" required>
+        {% if available_approvers %}
+            <div class="form-grid-2">
+                <div class="form-field-full">
+                    <label for="approver_user_select">Aprovador *</label>
+
+                    <select
+                        id="approver_user_select"
+                        required
+                        onchange="setApproverFromSelect()"
+                    >
+                        <option value="">
+                            Selecione um aprovador
+                        </option>
+
+                        {% for approver_user in available_approvers %}
+                            <option
+                                value="{{ approver_user.email }}"
+                                data-nome="{{ approver_user.nome }}"
+                                data-email="{{ approver_user.email }}"
+                                data-role="{{ approver_user.role }}"
+                                data-matricula="{{ approver_user.matricula if approver_user.matricula is defined else '' }}"
+                            >
+                                {{ approver_user.nome }}
+                                —
+                                {{ approver_user.email }}
+                                —
+                                {{ approver_user.role }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                    <p id="selected-approver-feedback" class="hint">
+                        Nenhum aprovador selecionado.
+                    </p>
+                </div>
             </div>
 
-            <div>
-                <label for="approver_matricula">Matrícula do aprovador</label>
-                <input type="text" id="approver_matricula" name="approver_matricula">
+            <input type="hidden" id="approver_nome" name="approver_nome" required>
+            <input type="hidden" id="approver_matricula" name="approver_matricula">
+            <input type="hidden" id="approver_email" name="approver_email" required>
+
+        {% else %}
+            <div class="message warning">
+                Nenhum aprovador ativo encontrado. Cadastre ou ative um usuário ADMIN ou OPERADOR antes de criar o empréstimo.
             </div>
 
-            <div>
-                <label for="approver_email">E-mail do aprovador *</label>
-                <input type="email" id="approver_email" name="approver_email" required>
-            </div>
-        </div>
+            <input type="hidden" id="approver_nome" name="approver_nome">
+            <input type="hidden" id="approver_matricula" name="approver_matricula">
+            <input type="hidden" id="approver_email" name="approver_email">
+        {% endif %}
     </section>
 
     <section class="form-section-card">
@@ -460,6 +494,13 @@ function clearEquipmentSearch() {
 }
 
 function validateLoanFormBeforeSubmit() {
+    const approverEmail = document.getElementById("approver_email");
+
+    if (!approverEmail || !approverEmail.value.trim()) {
+        alert("Selecione um aprovador antes de criar o empréstimo.");
+        return false;
+    }
+
     if (selectedEquipments.size === 0) {
         alert("Selecione ao menos um equipamento antes de criar o empréstimo.");
         return false;
@@ -474,6 +515,45 @@ document.getElementById("equipment_search").addEventListener("keydown", function
         searchEquipments();
     }
 });
+
+function setApproverFromSelect() {
+    const select = document.getElementById("approver_user_select");
+    const feedback = document.getElementById("selected-approver-feedback");
+
+    const approverNome = document.getElementById("approver_nome");
+    const approverMatricula = document.getElementById("approver_matricula");
+    const approverEmail = document.getElementById("approver_email");
+
+    if (!select || !approverNome || !approverEmail) {
+        return;
+    }
+
+    const selectedOption = select.options[select.selectedIndex];
+
+    if (!selectedOption || !selectedOption.value) {
+        approverNome.value = "";
+        approverMatricula.value = "";
+        approverEmail.value = "";
+
+        if (feedback) {
+            feedback.textContent = "Nenhum aprovador selecionado.";
+            feedback.className = "hint warning-text";
+        }
+
+        return;
+    }
+
+    approverNome.value = selectedOption.dataset.nome || "";
+    approverMatricula.value = selectedOption.dataset.matricula || "";
+    approverEmail.value = selectedOption.dataset.email || "";
+
+    if (feedback) {
+        feedback.textContent =
+            `Aprovador selecionado: ${approverNome.value} (${approverEmail.value})`;
+
+        feedback.className = "hint success-text";
+    }
+}
 
 renderSelectedEquipments();
 </script>

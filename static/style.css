@@ -1652,3 +1652,13 @@ button:disabled {
 .secondary-button:hover {
     background: #4b5563;
 }
+
+.success-text {
+    color: #166534;
+    font-weight: 700;
+}
+
+.warning-text {
+    color: #92400e;
+    font-weight: 700;
+}

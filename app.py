@@ -85,7 +85,11 @@ def create_app(config_override: dict | None = None):
             "auth_bp.login",
             "auth_bp.logout",
             "auth_bp.setup_first_admin",
+            "auth_bp.forgot_password",
             "loan_bp.verify_loan_document",
+
+            # Se ainda existir link antigo de aprovação por e-mail, deixe aqui
+            # apenas se ele redirecionar para /aprovacoes/ e não aprovar direto.
             "loan_bp.approve_loan",
         }
 
@@ -104,6 +108,22 @@ def create_app(config_override: dict | None = None):
             flash("Faça login para acessar o sistema.", "error")
             return redirect(url_for("auth_bp.login"))
 
+        forced_password_endpoints = {
+            "auth_bp.force_change_password",
+            "auth_bp.logout",
+        }
+
+        if (
+            getattr(current_user, "must_change_password", False)
+            and endpoint not in forced_password_endpoints
+            and not endpoint.startswith("static")
+        ):
+            flash(
+                "Você precisa alterar sua senha temporária antes de continuar.",
+                "warning",
+            )
+            return redirect(url_for("auth_bp.force_change_password"))
+
         # Manutenção e usuários: somente ADMIN.
         admin_only_prefixes = [
             "maintenance_bp.",
@@ -117,6 +137,7 @@ def create_app(config_override: dict | None = None):
             "auth_bp.list_users",
             "auth_bp.new_user",
             "auth_bp.edit_user",
+            "auth_bp.reset_user_password",
         }
 
         if (
@@ -127,9 +148,11 @@ def create_app(config_override: dict | None = None):
                 flash("Acesso restrito ao administrador.", "error")
                 return redirect(url_for("main_bp.dashboard"))
 
-        # Perfil CONSULTA pode navegar, mas não executar ações POST.
+        # Perfil CONSULTA pode navegar, mas não executar ações POST,
+        # exceto ações explicitamente permitidas.
         allowed_post_for_consulta = {
             "auth_bp.change_password",
+            "auth_bp.force_change_password",
             "approval_bp.approve_loan",
             "approval_bp.reject_loan",
         }

@@ -15,6 +15,7 @@ from flask import (
 )
 
 from enums.loan_status import LoanStatus
+from enums.user_role import UserRole
 
 from models.loan_item import LoanItem
 from models.loan import Loan
@@ -22,6 +23,7 @@ from models.loan_item import LoanItem
 from models.equipment import Equipment
 from models.loan_item import LoanItem
 from models.user import User
+from models.system_user import SystemUser
 
 from services.email_service import EmailService
 from services.email_log_service import EmailLogService
@@ -68,6 +70,28 @@ def _loan_has_pending_validation(loan) -> bool:
             return True
 
     return False
+
+def get_available_approvers():
+    """
+    Retorna usuários ativos que podem aprovar empréstimos.
+
+    Aprovadores disponíveis:
+    - ADMIN
+    - OPERADOR
+    """
+
+    return (
+        SystemUser.query
+        .filter(
+            SystemUser.active.is_(True),
+            SystemUser.role.in_([
+                UserRole.ADMIN.value,
+                UserRole.OPERADOR.value,
+            ]),
+        )
+        .order_by(SystemUser.nome.asc())
+        .all()
+    )
 
 @loan_bp.route("/")
 def list_loans():
@@ -357,9 +381,12 @@ def new_loan():
         except Exception as exc:
             flash(str(exc), "error")
 
+    available_approvers = get_available_approvers()
+
     return render_template(
         "loan_form.html",
         fixed_notification_emails=fixed_notification_emails,
+        available_approvers=available_approvers,
     )
 
 
