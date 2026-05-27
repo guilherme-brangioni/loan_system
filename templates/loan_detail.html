@@ -488,6 +488,196 @@
 <p>Nenhum item vinculado a este empréstimo.</p>
 {% endif %}
 
+<section class="loan-operational-card">
+
+    <div class="loan-operational-header">
+        <h3>Registros operacionais do empréstimo</h3>
+        <p>
+            Pendências externas, e-mails e histórico relacionados a este empréstimo.
+        </p>
+    </div>
+
+    <div class="loan-operational-grid">
+
+        <section class="loan-operational-panel">
+            <div class="loan-operational-panel-header">
+                <h4>Pendências externas</h4>
+                <span>{{ related_external_pendings|length }}</span>
+            </div>
+
+            {% if related_external_pendings %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Tentativas</th>
+                            <th>Criada em</th>
+                            <th>Erro</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for pending in related_external_pendings %}
+                        <tr>
+                            <td>{{ pending.action }}</td>
+
+                            <td>
+                                <span class="status-badge {{ status_badge_class(pending.status) }}">
+                                    {{ format_status_label(pending.status) }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ pending.attempts or 0 }} / {{ pending.max_attempts or "-" }}
+                            </td>
+
+                            <td>
+                                {{ pending.created_at.strftime("%d/%m/%Y %H:%M") if pending.created_at else "-" }}
+                            </td>
+
+                            <td>
+                                {% if pending.last_error %}
+                                    <details>
+                                        <summary>Ver erro</summary>
+                                        <pre>{{ pending.last_error }}</pre>
+                                    </details>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="hint">
+                    Nenhuma pendência externa registrada para este empréstimo.
+                </p>
+            {% endif %}
+        </section>
+
+        <section class="loan-operational-panel">
+            <div class="loan-operational-panel-header">
+                <h4>E-mails relacionados</h4>
+                <span>{{ related_email_logs|length }}</span>
+            </div>
+
+            {% if related_email_logs %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Assunto</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                            <th>Erro</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for log in related_email_logs %}
+                        <tr>
+                            <td>{{ log.email_type or "-" }}</td>
+
+                            <td>
+                                <small>{{ log.subject or "-" }}</small>
+                            </td>
+
+                            <td>
+                                {% if log.success %}
+                                    <span class="status-badge status-success">
+                                        Enviado
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge status-danger">
+                                        Falhou
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ log.created_at.strftime("%d/%m/%Y %H:%M") if log.created_at else "-" }}
+                            </td>
+
+                            <td>
+                                {% if log.error %}
+                                    <details>
+                                        <summary>Ver erro</summary>
+                                        <pre>{{ log.error }}</pre>
+                                    </details>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="hint">
+                    Nenhum e-mail registrado para este empréstimo.
+                </p>
+            {% endif %}
+        </section>
+
+    </div>
+
+    <section class="loan-operational-panel loan-audit-panel">
+        <div class="loan-operational-panel-header">
+            <h4>Histórico / Auditoria</h4>
+            <span>{{ related_audit_logs|length }}</span>
+        </div>
+
+        {% if related_audit_logs %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Ação</th>
+                        <th>Realizado por</th>
+                        <th>Detalhes</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for log in related_audit_logs %}
+                    <tr>
+                        <td>
+                            {{ log.created_at.strftime("%d/%m/%Y %H:%M") if log.created_at else "-" }}
+                        </td>
+
+                        <td>
+                            <strong>{{ log.action or "-" }}</strong>
+                        </td>
+
+                        <td>
+                            {{ log.performed_by or "-" }}
+                        </td>
+
+                        <td>
+                            {% if log.new_data %}
+                                <details>
+                                    <summary>Ver dados</summary>
+                                    <pre>{{ log.new_data }}</pre>
+                                </details>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="hint">
+                Nenhum histórico de auditoria registrado para este empréstimo.
+            </p>
+        {% endif %}
+    </section>
+
+</section>
+
 {% if loan.observacoes %}
 <section class="form-card">
     <h3>Observações</h3>

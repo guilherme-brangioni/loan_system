@@ -2053,3 +2053,105 @@ button:disabled {
         width: 100%;
     }
 }
+
+/* =========================================================
+   DETALHE DO EMPRÉSTIMO - REGISTROS OPERACIONAIS
+   ========================================================= */
+
+.loan-operational-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 18px 0 24px;
+
+    border-left: 5px solid #065f46;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.loan-operational-header {
+    margin-bottom: 16px;
+}
+
+.loan-operational-header h3 {
+    margin: 0 0 6px;
+}
+
+.loan-operational-header p {
+    margin: 0;
+    color: #4b5563;
+}
+
+.loan-operational-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.loan-operational-panel {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px;
+    background: #f9fafb;
+    overflow-x: auto;
+}
+
+.loan-operational-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.loan-operational-panel-header h4 {
+    margin: 0;
+}
+
+.loan-operational-panel-header span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 28px;
+    height: 28px;
+    padding: 0 8px;
+
+    border-radius: 999px;
+
+    background: #ecfdf5;
+    border: 1px solid #10b981;
+    color: #064e3b;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.loan-audit-panel {
+    margin-top: 16px;
+}
+
+.loan-operational-panel table {
+    margin-top: 0;
+}
+
+.loan-operational-panel pre {
+    max-width: 460px;
+    max-height: 180px;
+    overflow: auto;
+
+    padding: 10px;
+    border-radius: 8px;
+
+    background: #f3f4f6;
+    color: #111827;
+
+    white-space: pre-wrap;
+    font-size: 12px;
+}
+
+@media (max-width: 1000px) {
+    .loan-operational-grid {
+        grid-template-columns: 1fr;
+    }
+}

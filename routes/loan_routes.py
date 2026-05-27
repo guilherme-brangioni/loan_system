@@ -17,6 +17,7 @@ from flask import (
 from enums.loan_status import LoanStatus
 from enums.user_role import UserRole
 
+from models.audit_log import AuditLog
 from models.loan_item import LoanItem
 from models.loan import Loan
 from models.loan_item import LoanItem
@@ -24,6 +25,8 @@ from models.equipment import Equipment
 from models.loan_item import LoanItem
 from models.user import User
 from models.system_user import SystemUser
+from models.email_log import EmailLog
+from models.external_pending import ExternalPending
 
 from services.email_service import EmailService
 from services.email_log_service import EmailLogService
@@ -393,7 +396,7 @@ def new_loan():
 @loan_bp.route("/<int:loan_id>")
 def loan_detail(loan_id: int):
     """
-    Exibe os detalhes de um empréstimo.
+    Detalhe operacional do empréstimo.
     """
 
     loan = (
@@ -403,9 +406,42 @@ def loan_detail(loan_id: int):
         .first_or_404()
     )
 
+    related_external_pendings = (
+        ExternalPending.query
+        .filter(
+            ExternalPending.entity_type == "LOAN",
+            ExternalPending.entity_id == loan.id,
+        )
+        .order_by(ExternalPending.created_at.desc())
+        .limit(30)
+        .all()
+    )
+
+    related_email_logs = (
+        EmailLog.query
+        .filter(EmailLog.loan_id == loan.id)
+        .order_by(EmailLog.created_at.desc())
+        .limit(30)
+        .all()
+    )
+
+    related_audit_logs = (
+        AuditLog.query
+        .filter(
+            AuditLog.entity_type == "LOAN",
+            AuditLog.entity_id == loan.id,
+        )
+        .order_by(AuditLog.created_at.desc())
+        .limit(30)
+        .all()
+    )
+
     return render_template(
         "loan_detail.html",
         loan=loan,
+        related_external_pendings=related_external_pendings,
+        related_email_logs=related_email_logs,
+        related_audit_logs=related_audit_logs,
     )
 
 
