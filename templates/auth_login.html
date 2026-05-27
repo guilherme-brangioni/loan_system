@@ -24,7 +24,15 @@
         autocomplete="current-password"
     >
 
-    <button type="submit">Entrar</button>
+    <button type="submit">
+        Entrar
+    </button>
+
+    <p class="login-help">
+        <a href="{{ url_for('auth_bp.forgot_password') }}">
+            Esqueci minha senha
+        </a>
+    </p>
 
 </form>
 

@@ -15,6 +15,7 @@
         <tr>
             <th>Nome</th>
             <th>E-mail</th>
+            <th>Senha</th>
             <th>Perfil</th>
             <th>Ativo</th>
             <th>Último login</th>
@@ -27,15 +28,43 @@
         <tr>
             <td>{{ user.nome }}</td>
             <td>{{ user.email }}</td>
+            <td>
+                {% if user.must_change_password %}
+                    <span class="status-badge status-warning">
+                        Troca pendente
+                    </span>
+                {% else %}
+                    <span class="status-badge status-success">
+                        Normal
+                    </span>
+                {% endif %}
+            </td>
             <td>{{ user.role }}</td>
             <td>{{ "Sim" if user.active else "Não" }}</td>
             <td>
                 {{ user.last_login_at.strftime("%d/%m/%Y %H:%M") if user.last_login_at else "-" }}
             </td>
+            
             <td>
-                <a href="{{ url_for('auth_bp.edit_user', user_id=user.id) }}">
-                    Editar
-                </a>
+                <form
+                    method="post"
+                    action="{{ url_for('auth_bp.reset_user_password', user_id=user.id) }}"
+                    onsubmit="return confirm('Gerar senha temporária e enviar para {{ user.email }}?');"
+                    style="display: inline;"
+                >
+                    <button type="submit" class="secondary-button">
+                        Resetar Senha
+                    </button>
+                </form>
+                <form
+                    method="post"
+                    action="{{ url_for('auth_bp.edit_user', user_id=user.id) }}"
+                    style="display: inline;"
+                >
+                    <button type="submit" class="secondary-button">
+                        Editar Usuário
+                    </button>
+                </form>
             </td>
         </tr>
         {% endfor %}

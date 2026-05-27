@@ -159,17 +159,17 @@
                         </button>
 
                         <div class="dropdown-menu dropdown-menu-right">
-                            <a href="{{ url_for('auth_bp.change_password') }}">
-                                Alterar senha
-                            </a>
-
                             {% if current_user.role == "ADMIN" %}
-                            <a href="{{ url_for('auth_bp.list_users') }}">
+                            <a class="nav-link" href="{{ url_for('auth_bp.list_users') }}">
                                 Usuários
                             </a>
                             {% endif %}
 
-                            <a href="{{ url_for('auth_bp.logout') }}">
+                            <a class="nav-link" href="{{ url_for('auth_bp.change_password') }}">
+                                Alterar senha
+                            </a>
+
+                            <a class="nav-link" href="{{ url_for('auth_bp.logout') }}">
                                 Sair
                             </a>
                         </div>

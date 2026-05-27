@@ -1662,3 +1662,22 @@ button:disabled {
     color: #92400e;
     font-weight: 700;
 }
+
+/* =========================================================
+   LOGIN / SENHA
+   ========================================================= */
+
+.login-help {
+    margin-top: 12px;
+    text-align: center;
+}
+
+.login-help a {
+    color: #064e3b;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-help a:hover {
+    text-decoration: underline;
+}
