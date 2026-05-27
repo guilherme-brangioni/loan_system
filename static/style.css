@@ -1219,3 +1219,259 @@ td small {
     color: #166534;
     font-weight: 600;
 }
+
+/* =========================================================
+   DETALHE DO EMPRÉSTIMO - AÇÕES AGRUPADAS
+   ========================================================= */
+
+.loan-actions-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 18px 0 24px;
+
+    border-left: 5px solid #064e3b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.loan-actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+
+    margin-bottom: 16px;
+}
+
+.loan-actions-header h3 {
+    margin: 0 0 6px;
+}
+
+.loan-actions-header p {
+    margin: 0;
+    color: #4b5563;
+}
+
+.loan-actions-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.loan-actions-grid form {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    margin: 0;
+}
+
+.loan-actions-grid input[type="text"],
+.loan-actions-grid input[type="date"] {
+    min-width: 180px;
+    height: 38px;
+}
+
+.secondary-button {
+    background: #6b7280;
+    color: white;
+}
+
+.secondary-button:hover {
+    background: #4b5563;
+}
+
+.danger-button {
+    background: #991b1b;
+    color: white;
+}
+
+.danger-button:hover {
+    background: #7f1d1d;
+}
+
+@media (max-width: 900px) {
+    .loan-actions-grid {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .loan-actions-grid form,
+    .loan-actions-grid a,
+    .loan-actions-grid button,
+    .loan-actions-grid input {
+        width: 100%;
+    }
+
+    .loan-actions-grid form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* =========================================================
+   TABELAS - CABEÇALHO CENTRALIZADO
+   ========================================================= */
+
+table thead th {
+    text-align: center !important;
+    vertical-align: middle !important;
+
+    height: 48px;
+    padding: 12px 10px;
+
+    white-space: normal;
+    line-height: 1.35;
+}
+
+table thead th * {
+    text-align: center;
+}
+
+/* =========================================================
+   DETALHE DO EMPRÉSTIMO - LINHA DO TEMPO
+   ========================================================= */
+
+.loan-timeline-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 18px 0 24px;
+
+    border-left: 5px solid #047857;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.loan-timeline-header {
+    margin-bottom: 18px;
+}
+
+.loan-timeline-header h3 {
+    margin: 0 0 6px;
+}
+
+.loan-timeline-header p {
+    margin: 0;
+    color: #4b5563;
+}
+
+.loan-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.timeline-item {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 12px;
+
+    padding-bottom: 18px;
+}
+
+.timeline-item::before {
+    content: "";
+    position: absolute;
+
+    left: 10px;
+    top: 22px;
+    bottom: 0;
+
+    width: 2px;
+    background: #d1d5db;
+}
+
+.timeline-item:last-child::before {
+    display: none;
+}
+
+.timeline-marker {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+
+    border: 3px solid #d1d5db;
+    background: white;
+
+    z-index: 1;
+}
+
+.timeline-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    padding-bottom: 4px;
+}
+
+.timeline-content strong {
+    font-size: 14px;
+    color: #111827;
+}
+
+.timeline-content span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.timeline-content small {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.timeline-done .timeline-marker {
+    background: #10b981;
+    border-color: #10b981;
+}
+
+.timeline-done::before {
+    background: #10b981;
+}
+
+.timeline-pending .timeline-marker {
+    background: white;
+    border-color: #d1d5db;
+}
+
+.timeline-danger .timeline-marker {
+    background: #dc2626;
+    border-color: #dc2626;
+}
+
+.timeline-danger::before {
+    background: #dc2626;
+}
+
+.timeline-danger .timeline-content strong,
+.timeline-danger .timeline-content span {
+    color: #991b1b;
+}
+
+/* =========================================================
+   PENDÊNCIAS EXTERNAS
+   ========================================================= */
+
+details summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: #064e3b;
+}
+
+details pre {
+    max-width: 420px;
+    max-height: 180px;
+    overflow: auto;
+
+    padding: 10px;
+    border-radius: 8px;
+
+    background: #f3f4f6;
+    color: #111827;
+
+    white-space: pre-wrap;
+    font-size: 12px;
+}

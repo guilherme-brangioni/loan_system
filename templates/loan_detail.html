@@ -2,192 +2,110 @@
 
 {% block content %}
 
-<p>
-    <strong>Controle do Empréstimo:</strong>
-
-    <span class="copy-control-wrapper">
-        <span>{{ loan.numero_controle }}</span>
-
-        <button
-            type="button"
-            class="copy-control-button"
-            onclick="copyToClipboard('{{ loan.numero_controle }}', 'copy-feedback-loan-{{ loan.id }}')"
-        >
-            Copiar
-        </button>
-
-        <span
-            id="copy-feedback-loan-{{ loan.id }}"
-            class="copy-feedback"
-        ></span>
-    </span>
-</p>
+<h2>Detalhe do empréstimo</h2>
 
 <section class="detail-grid">
+
     <div>
-        <h3>Status</h3>
-        <span class="status-badge {{ status_badge_class(loan.status) }}">
-            {{ format_status_label(loan.status) }}
-        </span>
+        <h3>Identificação</h3>
+
+        <p>
+            <strong>Controle:</strong>
+
+            <span class="copy-control-wrapper">
+                <span>{{ loan.numero_controle }}</span>
+
+                <button
+                    type="button"
+                    class="copy-control-button"
+                    onclick="copyToClipboard('{{ loan.numero_controle }}', 'copy-feedback-loan-{{ loan.id }}')"
+                >
+                    Copiar
+                </button>
+
+                <span
+                    id="copy-feedback-loan-{{ loan.id }}"
+                    class="copy-feedback"
+                ></span>
+            </span>
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            <span class="status-badge {{ status_badge_class(loan.status) }}">
+                {{ format_status_label(loan.status) }}
+            </span>
+        </p>
+
+        <p>
+            <strong>Data do empréstimo:</strong>
+            {{ loan.data_emprestimo.strftime("%d/%m/%Y") if loan.data_emprestimo else "-" }}
+        </p>
+
+        <p>
+            <strong>Previsão de devolução:</strong>
+            {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+        </p>
+
+        <p>
+            <strong>Data real de devolução:</strong>
+            {{ loan.data_real_devolucao.strftime("%d/%m/%Y") if loan.data_real_devolucao else "-" }}
+        </p>
+
+        <p>
+            <strong>Local de utilização:</strong>
+            {{ loan.local_utilizacao or "-" }}
+        </p>
     </div>
 
     <div>
         <h3>Solicitante</h3>
-        <p>{{ loan.user.nome }}</p>
-        <p>{{ loan.user.matricula }}</p>
-        <p>{{ loan.user.email }}</p>
+
+        {% if loan.user %}
+            <p><strong>Nome:</strong> {{ loan.user.nome or "-" }}</p>
+            <p><strong>Matrícula:</strong> {{ loan.user.matricula or "-" }}</p>
+            <p><strong>E-mail:</strong> {{ loan.user.email or "-" }}</p>
+            <p><strong>Telefone:</strong> {{ loan.user.telefone or "-" }}</p>
+            <p><strong>Gerência:</strong> {{ loan.user.gerencia or "-" }}</p>
+            <p><strong>Regional:</strong> {{ loan.user.regional or "-" }}</p>
+            <p><strong>Equipe:</strong> {{ loan.user.equipe or "-" }}</p>
+        {% else %}
+            <p>-</p>
+        {% endif %}
     </div>
 
     <div>
         <h3>Aprovador</h3>
-        <p>{{ loan.approver.nome }}</p>
-        <p>{{ loan.approver.email }}</p>
-    </div>
 
-    <div>
-        <h3>Entrega</h3>
-        <p>{{ loan.responsavel_entrega_nome }}</p>
-        <p>{{ loan.responsavel_entrega_matricula or "-" }}</p>
-    </div>
+        {% if loan.approver %}
+            <p><strong>Nome:</strong> {{ loan.approver.nome or "-" }}</p>
+            <p><strong>Matrícula:</strong> {{ loan.approver.matricula or "-" }}</p>
+            <p><strong>E-mail:</strong> {{ loan.approver.email or "-" }}</p>
+        {% else %}
+            <p>-</p>
+        {% endif %}
 
-    <div>
         <h3>Responsável pela coleta/entrega</h3>
-        <p>{{ loan.responsavel_entrega_nome }}</p>
-        <p>{{ loan.responsavel_entrega_matricula or "-" }}</p>
-        <p>{{ loan.responsavel_entrega_email or "-" }}</p>
+
+        <p>
+            <strong>Nome:</strong>
+            {{ loan.responsavel_entrega_nome or "-" }}
+        </p>
+
+        <p>
+            <strong>Matrícula:</strong>
+            {{ loan.responsavel_entrega_matricula or "-" }}
+        </p>
+
+        <p>
+            <strong>E-mail:</strong>
+            {{ loan.responsavel_entrega_email or "-" }}
+        </p>
     </div>
+
 </section>
 
-<h3>Destinatários do comprovante</h3>
-
-<p class="hint">
-    O comprovante será enviado para os e-mails fixos, e-mails adicionais,
-    solicitante, aprovador e responsável pela coleta/entrega.
-</p>
-
-{% if loan.notification_all_emails %}
-    <pre>{{ loan.notification_all_emails }}</pre>
-{% else %}
-    <p>Nenhum destinatário informativo adicional registrado.</p>
-{% endif %}
-
-<h3>Itens</h3>
-
-<table>
-    <thead>
-        <tr>
-            <th>Tipo</th>
-            <th>Item</th>
-            <th>Quantidade</th>
-            <th>Devolvido</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for item in loan.items %}
-        <tr>
-            <td>{{ item.tipo_item }}</td>
-
-            <td>
-                {% if item.equipment %}
-                    <strong>{{ item.equipment.tipo_equipamento or "-" }}</strong><br>
-                    Fabricante: {{ item.equipment.fabricante or "-" }}<br>
-                    Modelo: {{ item.equipment.modelo or "-" }}<br>
-                    Patrimônio: {{ item.equipment.patrimonio or "-" }}<br>
-                    Código do equipamento: {{ item.equipment.codigo_equipamento or "-" }}<br>
-                    Número de série: {{ item.equipment.serial or "-" }}<br>
-                    Código interno: {{ item.equipment.codigo_interno }}
-
-                    {% if item.image_path %}
-                        <br>
-                        <small>Imagem anexada ao comprovante: Sim</small>
-                    {% else %}
-                        <br>
-                        <small>Imagem anexada ao comprovante: Não</small>
-                    {% endif %}
-
-                {% endif %}
-            </td>
-
-            <td>{{ item.quantidade }}</td>
-            <td>{{ item.quantidade_devolvida }}</td>
-            <td>
-                <span class="status-badge {{ status_badge_class(item.status) }}">
-                    {{ format_status_label(item.status) }}
-                </span>
-            </td>    
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<section class="actions">
-    {% if loan.status == "APROVADO" %}
-    <form 
-        method="post"
-        action="{{ url_for('loan_bp.confirm_withdrawal', loan_id=loan.id) }}"
-        onsubmit="return confirm('Confirmar retirada/coleta do empréstimo {{ loan.numero_controle }}? Os equipamentos serão marcados como emprestados.');"
-    >
-        <button type="submit">Confirmar retirada</button>
-    </form>
-    {% endif %}
-
-    {% if loan.status in ["RETIRADO", "PARCIALMENTE_DEVOLVIDO", "ATRASADO"] %}
-    <a class="button" href="{{ url_for('loan_bp.return_items', loan_id=loan.id) }}">
-        Devolver item
-    </a>
-    {% endif %}
-
-    {% if loan.status in ["RETIRADO", "PARCIALMENTE_DEVOLVIDO", "ATRASADO"] %}
-    <form
-        method="post"
-        action="{{ url_for('loan_bp.return_all_items', loan_id=loan.id) }}"
-        onsubmit="return confirm('Confirmar devolução total do empréstimo {{ loan.numero_controle }}? Esta ação marcará todos os itens como devolvidos e liberará os equipamentos.');"
-    >
-        <input
-            type="text"
-            name="devolvido_por"
-            placeholder="Recebido por"
-            required
-        >
-
-        <button type="submit">
-            Marcar como Devolvido
-        </button>
-    </form>
-    {% endif %}
-
-    <a class="button secondary" href="{{ url_for('loan_bp.loan_pdf', loan_id=loan.id) }}">
-        Baixar PDF
-    </a>
-
-    <form
-        method="post"
-        action="{{ url_for('email_bp.resend_approval_email', loan_id=loan.id) }}"
-    >
-        <button type="submit">Reenviar aprovação</button>
-    </form>
-
-    <form
-        method="post"
-        action="{{ url_for('email_bp.resend_receipt_email', loan_id=loan.id) }}"
-        onsubmit="return confirm('Reenviar o comprovante do empréstimo {{ loan.numero_controle }} para todos os destinatários configurados?');"
-    >
-        <button type="submit">Reenviar comprovante</button>
-    </form>
-    
-</section>
-
-<h3>Renovação</h3>
-
-<form method="post" action="{{ url_for('loan_bp.renew_loan', loan_id=loan.id) }}" class="form-inline">
-    <input type="date" name="new_due_date" required>
-    <input type="text" name="renewed_by" placeholder="Renovado por" required>
-    <input type="text" name="reason" placeholder="Motivo">
-    <button type="submit">Renovar</button>
-</form>
-
+{% set action_status = loan.status %}
 {% set ns = namespace(has_pending_validation=false) %}
 
 {% for item in loan.items %}
@@ -196,61 +114,391 @@
     {% endif %}
 {% endfor %}
 
-{% if ns.has_pending_validation and loan.status not in ["FINALIZADO", "REJEITADO", "CANCELADO"] %}
-<section class="actions">
-    <form
-        method="post"
-        action="{{ url_for('loan_bp.validate_loan_equipments', loan_id=loan.id) }}"
-        onsubmit="return confirm('Confirmar validação dos equipamentos do empréstimo {{ loan.numero_controle }}?');"
-    >
-        <input
-            type="text"
-            name="validated_by"
-            placeholder="Validado por"
-            required
+<section class="loan-actions-card">
+
+    <div class="loan-actions-header">
+        <div>
+            <h3>Ações</h3>
+
+            <p>
+                Controle:
+                <strong>{{ loan.numero_controle }}</strong>
+                |
+                Status:
+                <span class="status-badge {{ status_badge_class(loan.status) }}">
+                    {{ format_status_label(loan.status) }}
+                </span>
+            </p>
+        </div>
+    </div>
+
+    <div class="loan-actions-grid">
+
+        <a
+            class="button secondary"
+            href="{{ url_for('loan_bp.loan_pdf', loan_id=loan.id) }}"
         >
+            Baixar PDF
+        </a>
 
-        <button type="submit">
-            Validar equipamentos deste empréstimo
-        </button>
-    </form>
+        <form
+            method="post"
+            action="{{ url_for('email_bp.resend_receipt_email', loan_id=loan.id) }}"
+            onsubmit="return confirm('Reenviar o comprovante do empréstimo {{ loan.numero_controle }} para todos os destinatários configurados?');"
+        >
+            <button type="submit" class="secondary-button">
+                Reenviar comprovante
+            </button>
+        </form>
+
+        {% if action_status == "PENDENTE_APROVACAO" %}
+            <a
+                class="button secondary"
+                href="{{ url_for('approval_bp.my_approvals') }}"
+            >
+                Abrir aprovações
+            </a>
+
+            {% if current_user and current_user.role in ["ADMIN", "OPERADOR"] %}
+                <form
+                    method="post"
+                    action="{{ url_for('email_bp.resend_approval_email', loan_id=loan.id) }}"
+                    onsubmit="return confirm('Reenviar e-mail de aprovação do empréstimo {{ loan.numero_controle }} para o aprovador?');"
+                >
+                    <button type="submit" class="secondary-button">
+                        Reenviar e-mail de aprovação
+                    </button>
+                </form>
+            {% endif %}
+        {% endif %}
+
+        {% if action_status == "APROVADO" %}
+            <form
+                method="post"
+                action="{{ url_for('loan_bp.confirm_withdrawal', loan_id=loan.id) }}"
+                onsubmit="return confirm('Confirmar retirada/coleta do empréstimo {{ loan.numero_controle }}? Os equipamentos serão marcados como emprestados.');"
+            >
+                <input
+                    type="text"
+                    name="performed_by"
+                    placeholder="Entregue/coletado por"
+                    required
+                >
+
+                <button type="submit">
+                    Confirmar retirada
+                </button>
+            </form>
+        {% endif %}
+
+        {% if action_status in ["RETIRADO", "ATRASADO", "PARCIALMENTE_DEVOLVIDO"] %}
+            <a
+                class="button secondary"
+                href="{{ url_for('loan_bp.return_items', loan_id=loan.id) }}"
+            >
+                Devolução parcial
+            </a>
+
+            <form
+                method="post"
+                action="{{ url_for('loan_bp.return_all_items', loan_id=loan.id) }}"
+                onsubmit="return confirm('Confirmar devolução total do empréstimo {{ loan.numero_controle }}? Esta ação marcará todos os itens como devolvidos e liberará os equipamentos.');"
+            >
+                <input
+                    type="text"
+                    name="devolvido_por"
+                    placeholder="Devolvido por"
+                    required
+                >
+
+                <button type="submit">
+                    Marcar como devolvido
+                </button>
+            </form>
+
+            <form
+                method="post"
+                action="{{ url_for('loan_bp.renew_loan', loan_id=loan.id) }}"
+                onsubmit="return confirm('Confirmar renovação do empréstimo {{ loan.numero_controle }}?');"
+            >
+                <input
+                    type="date"
+                    name="new_due_date"
+                    required
+                >
+
+                <input
+                    type="text"
+                    name="reason"
+                    placeholder="Motivo da renovação"
+                >
+
+                <button type="submit" class="secondary-button">
+                    Renovar
+                </button>
+            </form>
+        {% endif %}
+
+        {% if ns.has_pending_validation and action_status not in ["FINALIZADO", "REJEITADO", "CANCELADO"] %}
+            <form
+                method="post"
+                action="{{ url_for('loan_bp.validate_loan_equipments', loan_id=loan.id) }}"
+                onsubmit="return confirm('Confirmar validação dos equipamentos do empréstimo {{ loan.numero_controle }}?');"
+            >
+                <button type="submit">
+                    Validar equipamentos
+                </button>
+            </form>
+        {% endif %}
+
+        {% if current_user and current_user.role in ["ADMIN", "OPERADOR"] %}
+            <a
+                class="button secondary"
+                href="{{ url_for('external_pending_bp.external_pending_page') }}"
+            >
+                Pendências externas
+            </a>
+        {% endif %}
+
+    </div>
+
 </section>
-{% endif %}
 
-<h3>Histórico de renovações</h3>
+<section class="loan-timeline-card">
 
-{% if loan.renewals %}
+    <div class="loan-timeline-header">
+        <h3>Linha do tempo do empréstimo</h3>
+        <p>
+            Acompanhe os principais eventos deste empréstimo.
+        </p>
+    </div>
+
+    <div class="loan-timeline">
+
+        <div class="timeline-item timeline-done">
+            <div class="timeline-marker"></div>
+
+            <div class="timeline-content">
+                <strong>Solicitação criada</strong>
+
+                <span>
+                    {{ loan.created_at.strftime("%d/%m/%Y %H:%M") if loan.created_at else "-" }}
+                </span>
+
+                <small>
+                    Empréstimo registrado no sistema.
+                </small>
+            </div>
+        </div>
+
+        <div class="timeline-item {% if loan.status in ['APROVADO', 'RETIRADO', 'ATRASADO', 'PARCIALMENTE_DEVOLVIDO', 'FINALIZADO'] %}timeline-done{% else %}timeline-pending{% endif %}">
+            <div class="timeline-marker"></div>
+
+            <div class="timeline-content">
+                <strong>Aprovação</strong>
+
+                {% if loan.status in ['APROVADO', 'RETIRADO', 'ATRASADO', 'PARCIALMENTE_DEVOLVIDO', 'FINALIZADO'] %}
+                    <span>Aprovado</span>
+                    <small>
+                        Solicitação aprovada pelo responsável.
+                    </small>
+                {% elif loan.status == "REJEITADO" %}
+                    <span>Rejeitado</span>
+                    <small>
+                        Solicitação rejeitada.
+                    </small>
+                {% else %}
+                    <span>Pendente</span>
+                    <small>
+                        Aguardando aprovação.
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="timeline-item {% if loan.status in ['RETIRADO', 'ATRASADO', 'PARCIALMENTE_DEVOLVIDO', 'FINALIZADO'] %}timeline-done{% else %}timeline-pending{% endif %}">
+            <div class="timeline-marker"></div>
+
+            <div class="timeline-content">
+                <strong>Retirada / coleta</strong>
+
+                {% if loan.status in ['RETIRADO', 'ATRASADO', 'PARCIALMENTE_DEVOLVIDO', 'FINALIZADO'] %}
+                    <span>
+                        {{ loan.data_emprestimo.strftime("%d/%m/%Y") if loan.data_emprestimo else "Confirmada" }}
+                    </span>
+
+                    <small>
+                        Equipamentos marcados como emprestados.
+                    </small>
+                {% else %}
+                    <span>Pendente</span>
+                    <small>
+                        Aguardando confirmação de retirada/coleta.
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="timeline-item {% if loan.status == 'ATRASADO' %}timeline-danger{% elif loan.status in ['RETIRADO', 'PARCIALMENTE_DEVOLVIDO', 'FINALIZADO'] %}timeline-done{% else %}timeline-pending{% endif %}">
+            <div class="timeline-marker"></div>
+
+            <div class="timeline-content">
+                <strong>Prazo de devolução</strong>
+
+                <span>
+                    {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+                </span>
+
+                {% if loan.status == "ATRASADO" %}
+                    <small>
+                        Prazo vencido. Devolução pendente.
+                    </small>
+                {% elif loan.status == "FINALIZADO" %}
+                    <small>
+                        Empréstimo já finalizado.
+                    </small>
+                {% else %}
+                    <small>
+                        Data prevista para devolução.
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+
+        {% set returned_items = loan.items | selectattr("devolvido_em") | list %}
+
+        {% if returned_items %}
+            <div class="timeline-item timeline-done">
+                <div class="timeline-marker"></div>
+
+                <div class="timeline-content">
+                    <strong>Devoluções registradas</strong>
+
+                    {% for item in returned_items %}
+                        <span>
+                            {{ item.devolvido_em.strftime("%d/%m/%Y %H:%M") if item.devolvido_em else "-" }}
+                        </span>
+
+                        <small>
+                            Devolvido por:
+                            {{ item.devolvido_por or "Não informado" }}
+                        </small>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="timeline-item {% if loan.status == 'FINALIZADO' %}timeline-done{% else %}timeline-pending{% endif %}">
+            <div class="timeline-marker"></div>
+
+            <div class="timeline-content">
+                <strong>Finalização</strong>
+
+                {% if loan.status == "FINALIZADO" %}
+                    <span>
+                        {{ loan.data_real_devolucao.strftime("%d/%m/%Y") if loan.data_real_devolucao else "Finalizado" }}
+                    </span>
+
+                    <small>
+                        Todos os itens foram devolvidos e liberados.
+                    </small>
+                {% else %}
+                    <span>Pendente</span>
+
+                    <small>
+                        Empréstimo ainda não finalizado.
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</section>
+
+<h3>Itens do empréstimo</h3>
+
+{% if loan.items %}
 <table>
     <thead>
         <tr>
-            <th>Data anterior</th>
-            <th>Nova data</th>
-            <th>Renovado por</th>
-            <th>Motivo</th>
+            <th>Código interno</th>
+            <th>Tipo</th>
+            <th>Fabricante</th>
+            <th>Modelo</th>
+            <th>Patrimônio</th>
+            <th>Cód. Equip.</th>
+            <th>Série</th>
+            <th>Status item</th>
+            <th>Validado</th>
+            <th>Imagem</th>
         </tr>
     </thead>
 
     <tbody>
-        {% for renewal in loan.renewals %}
-        <tr>
-            <td>{{ renewal.old_due_date.strftime("%d/%m/%Y") }}</td>
-            <td>{{ renewal.new_due_date.strftime("%d/%m/%Y") }}</td>
-            <td>{{ renewal.renewed_by }}</td>
-            <td>{{ renewal.reason or "-" }}</td>
-        </tr>
+        {% for item in loan.items %}
+            {% set equipment = item.equipment %}
+
+            <tr>
+                <td>
+                    {% if equipment %}
+                        <strong>{{ equipment.codigo_interno or "-" }}</strong>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <td>{{ equipment.tipo_equipamento if equipment else "-" }}</td>
+                <td>{{ equipment.fabricante if equipment else "-" }}</td>
+                <td>{{ equipment.modelo if equipment else "-" }}</td>
+                <td>{{ equipment.patrimonio if equipment else "-" }}</td>
+                <td>{{ equipment.codigo_equipamento if equipment else "-" }}</td>
+                <td>{{ equipment.serial if equipment else "-" }}</td>
+
+                <td>
+                    <span class="status-badge {{ status_badge_class(item.status) }}">
+                        {{ format_status_label(item.status) }}
+                    </span>
+                </td>
+
+                <td>
+                    {% if equipment and equipment.validado %}
+                        <span class="status-badge status-success">
+                            Sim
+                        </span>
+                    {% else %}
+                        <span class="status-badge status-warning">
+                            Não
+                        </span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if item.image_path %}
+                        Sim
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
-<p>Sem renovações registradas.</p>
+<p>Nenhum item vinculado a este empréstimo.</p>
 {% endif %}
+
+{% if loan.observacoes %}
+<section class="form-card">
+    <h3>Observações</h3>
+    <p>{{ loan.observacoes }}</p>
+</section>
+{% endif %}
+
+<p>
+    <a class="button secondary" href="{{ url_for('loan_bp.list_loans') }}">
+        Voltar para empréstimos
+    </a>
+</p>
 
 {% endblock %}
-
-<h3>Destinatários informativos</h3>
-
-{% if loan.notification_all_emails %}
-    <pre>{{ loan.notification_all_emails }}</pre>
-{% else %}
-    <p>Nenhum destinatário informativo registrado.</p>
-{% endif %}

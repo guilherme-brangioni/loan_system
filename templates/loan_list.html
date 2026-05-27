@@ -20,7 +20,7 @@
             <option value="">Todos os status</option>
             {% for status in status_options %}
                 <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>
-                    {{ status }}
+                    {{ format_status_label(status) }}
                 </option>
             {% endfor %}
         </select>
@@ -60,7 +60,9 @@
             <option value="100" {% if per_page == 100 %}selected{% endif %}>100</option>
         </select>
 
-        <button type="submit">Filtrar</button>
+        <button type="submit">
+            Filtrar
+        </button>
 
         <a class="button secondary" href="{{ url_for('loan_bp.list_loans') }}">
             Limpar
@@ -69,8 +71,10 @@
 </form>
 
 <p class="hint">
-    Total encontrado: <strong>{{ pagination.total }}</strong>
-    | Página {{ pagination.page }} de {{ pagination.pages }}
+    Total encontrado:
+    <strong>{{ pagination.total }}</strong>
+    |
+    Página {{ pagination.page }} de {{ pagination.pages }}
 </p>
 
 <table>
@@ -83,112 +87,131 @@
             <th>Status</th>
             <th>Data empréstimo</th>
             <th>Previsão devolução</th>
-            <th></th>
+            <th>Ações</th>
         </tr>
     </thead>
 
     <tbody>
         {% for loan in loans %}
-        {% set ns = namespace(has_pending_validation=false) %}
+            {% set ns = namespace(has_pending_validation=false) %}
 
-        {% for item in loan.items %}
-            {% if item.equipment and not item.equipment.validado %}
-                {% set ns.has_pending_validation = true %}
-            {% endif %}
-        {% endfor %}
-
-        <tr>
-            <td>
-                <div class="copy-control-wrapper">
-                    <strong>{{ loan.numero_controle }}</strong>
-
-                    <button
-                        type="button"
-                        class="copy-control-button"
-                        onclick="copyToClipboard('{{ loan.numero_controle }}', 'copy-feedback-list-{{ loan.id }}')"
-                    >
-                        Copiar
-                    </button>
-
-                    <span
-                        id="copy-feedback-list-{{ loan.id }}"
-                        class="copy-feedback"
-                    ></span>
-                </div>
-            </td>
-
-            <td>
-                {{ loan.user.nome }}
-                <br>
-                <small>Matrícula: {{ loan.user.matricula }}</small>
-            </td>
-
-            <td>
-                {% if loan.items %}
-                    {% for item in loan.items %}
-                        {% if item.equipment %}
-                            <div class="loan-equipment-summary">
-                                <strong>{{ item.equipment.tipo_equipamento or "EQUIPAMENTO" }}</strong>
-                                <br>
-
-                                {{ item.equipment.fabricante or "-" }}
-                                {{ item.equipment.modelo or "-" }}
-                                <br>
-
-                                <small>
-                                    Patrimônio:
-                                    {{ item.equipment.patrimonio or "-" }}
-                                    |
-                                    Cód. Equip.:
-                                    {{ item.equipment.codigo_equipamento or "-" }}
-                                    |
-                                    Série:
-                                    {{ item.equipment.serial or "-" }}
-                                </small>
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    <span>-</span>
+            {% for item in loan.items %}
+                {% if item.equipment and not item.equipment.validado %}
+                    {% set ns.has_pending_validation = true %}
                 {% endif %}
-            </td>
+            {% endfor %}
 
-            <td>
-                {% if ns.has_pending_validation and loan.status not in ["FINALIZADO", "REJEITADO", "CANCELADO"] %}
-                    <form
-                        method="post"
-                        action="{{ url_for('loan_bp.validate_loan_equipments', loan_id=loan.id) }}"
-                        onsubmit="return confirm('Confirmar validação dos equipamentos deste empréstimo?');"
-                    >
-                        <button type="submit">
-                            Validar
+            <tr>
+                <td>
+                    <div class="copy-control-wrapper">
+                        <strong>{{ loan.numero_controle }}</strong>
+
+                        <button
+                            type="button"
+                            class="copy-control-button"
+                            onclick="copyToClipboard('{{ loan.numero_controle }}', 'copy-feedback-list-{{ loan.id }}')"
+                        >
+                            Copiar
                         </button>
-                    </form>
-                {% else %}
-                    Validado
-                {% endif %}
-            </td>
 
-            <td>
-                <span class="status-badge {{ status_badge_class(loan.status) }}">
-                    {{ format_status_label(loan.status) }}
-                </span>
-            </td>
+                        <span
+                            id="copy-feedback-list-{{ loan.id }}"
+                            class="copy-feedback"
+                        ></span>
+                    </div>
+                </td>
 
-            <td>
-                {{ loan.data_emprestimo.strftime("%d/%m/%Y") if loan.data_emprestimo else "-" }}
-            </td>
+                <td>
+                    {% if loan.user %}
+                        {{ loan.user.nome }}
+                        <br>
+                        <small>Matrícula: {{ loan.user.matricula or "-" }}</small>
+                        <br>
+                        <small>{{ loan.user.email or "-" }}</small>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
 
-            <td>
-                {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
-            </td>
+                <td>
+                    {% if loan.items %}
+                        {% for item in loan.items %}
+                            {% if item.equipment %}
+                                <div class="loan-equipment-summary">
+                                    <strong>
+                                        {{ item.equipment.tipo_equipamento or "EQUIPAMENTO" }}
+                                    </strong>
+                                    <br>
 
-            <td>
-                <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
-                    Abrir
-                </a>
-            </td>
-        </tr>
+                                    {{ item.equipment.fabricante or "-" }}
+                                    {{ item.equipment.modelo or "-" }}
+                                    <br>
+
+                                    <small>
+                                        Cód. Interno:
+                                        {{ item.equipment.codigo_interno or "-" }}
+                                        |
+                                        Patrimônio:
+                                        {{ item.equipment.patrimonio or "-" }}
+                                        |
+                                        Cód. Equip.:
+                                        {{ item.equipment.codigo_equipamento or "-" }}
+                                        |
+                                        Série:
+                                        {{ item.equipment.serial or "-" }}
+                                    </small>
+
+                                    <br>
+
+                                    <span class="status-badge {{ status_badge_class(item.status) }}">
+                                        {{ format_status_label(item.status) }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if ns.has_pending_validation and loan.status not in ["FINALIZADO", "REJEITADO", "CANCELADO"] %}
+                        <form
+                            method="post"
+                            action="{{ url_for('loan_bp.validate_loan_equipments', loan_id=loan.id) }}"
+                            onsubmit="return confirm('Confirmar validação dos equipamentos do empréstimo {{ loan.numero_controle }}?');"
+                        >
+                            <button type="submit">
+                                Validar
+                            </button>
+                        </form>
+                    {% else %}
+                        <span class="status-badge status-success">
+                            Validado
+                        </span>
+                    {% endif %}
+                </td>
+
+                <td>
+                    <span class="status-badge {{ status_badge_class(loan.status) }}">
+                        {{ format_status_label(loan.status) }}
+                    </span>
+                </td>
+
+                <td>
+                    {{ loan.data_emprestimo.strftime("%d/%m/%Y") if loan.data_emprestimo else "-" }}
+                </td>
+
+                <td>
+                    {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+                </td>
+
+                <td>
+                    <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                        Abrir
+                    </a>
+                </td>
+            </tr>
         {% endfor %}
     </tbody>
 </table>
