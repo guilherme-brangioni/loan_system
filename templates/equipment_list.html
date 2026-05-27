@@ -96,8 +96,18 @@
                 <td>{{ item.serial or "-" }}</td>
                 <td>{{ item.regional or "-" }}</td>
                 <td>{{ item.local_armazenagem or "-" }}</td>
-                <td>{{ item.status }}</td>
-                <td>{{ "Sim" if item.validado else "Não" }}</td>
+                <td>
+                    <span class="status-badge {{ status_badge_class(item.status) }}">
+                        {{ format_status_label(item.status) }}
+                    </span>
+                </td>
+                <td>
+                    {% if item.validado %}
+                        <span class="status-badge status-success">Sim</span>
+                    {% else %}
+                        <span class="status-badge status-warning">Não</span>
+                    {% endif %}
+                </td>
                 <td>
                     <a href="{{ url_for('equipment_bp.edit_item', equipment_id=item.id) }}">
                         Editar

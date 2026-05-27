@@ -7,7 +7,9 @@
 <section class="detail-grid">
     <div>
         <h3>Status</h3>
-        <p>{{ loan.status }}</p>
+        <span class="status-badge {{ status_badge_class(loan.status) }}">
+            {{ format_status_label(loan.status) }}
+        </span>
     </div>
 
     <div>
@@ -91,7 +93,11 @@
 
             <td>{{ item.quantidade }}</td>
             <td>{{ item.quantidade_devolvida }}</td>
-            <td>{{ item.status }}</td>
+            <td>
+                <span class="status-badge {{ status_badge_class(item.status) }}">
+                    {{ format_status_label(item.status) }}
+                </span>
+            </td>    
         </tr>
         {% endfor %}
     </tbody>

@@ -49,9 +49,12 @@ def create_app(config_override: dict | None = None):
     @app.context_processor
     def inject_current_user():
         from services.auth_service import AuthService
+        from utils.status_ui import format_status_label, status_badge_class
 
         return {
             "current_user": AuthService.get_current_user(),
+            "status_badge_class": status_badge_class,
+            "format_status_label": format_status_label,
         }
 
     @app.before_request

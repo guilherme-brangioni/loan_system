@@ -154,7 +154,11 @@
                 {% endif %}
             </td>
 
-            <td>{{ loan.status }}</td>
+            <td>
+                <span class="status-badge {{ status_badge_class(loan.status) }}">
+                    {{ format_status_label(loan.status) }}
+                </span>
+            </td>
 
             <td>
                 {{ loan.data_emprestimo.strftime("%d/%m/%Y") if loan.data_emprestimo else "-" }}

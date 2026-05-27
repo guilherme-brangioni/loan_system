@@ -10,6 +10,7 @@ from services.loan_service import LoanService
 from services.validation_reminder_service import ValidationReminderService
 from services.backup_service import BackupService
 from services.external_pending_service import ExternalPendingService
+from services.sync_pending_service import SyncPendingService
 
 from utils.query_options import loan_full_options
 
@@ -92,6 +93,69 @@ def dashboard():
         if _loan_has_pending_validation(loan)
     ]
 
+    borrowed_count = len(borrowed_loans)
+    pending_approval_count = len(pending_approval_loans)
+    pending_validation_count = len(pending_validation_loans)
+
+    external_pending_count = ExternalPendingService.count_active_pendings()
+    sync_pending_count = SyncPendingService.count_active_pendings()
+
+    overdue_count = (
+        Loan.query
+        .filter(Loan.status == LoanStatus.ATRASADO.value)
+        .count()
+    )
+
+    attention_items = []
+
+    if overdue_count > 0:
+        attention_items.append({
+            "title": "Empréstimos atrasados",
+            "count": overdue_count,
+            "description": "Há empréstimos com prazo de devolução vencido.",
+            "url": url_for("loan_bp.overdue_report"),
+            "level": "danger",
+        })
+
+    if pending_approval_count > 0:
+        attention_items.append({
+            "title": "Aprovações pendentes",
+            "count": pending_approval_count,
+            "description": "Há solicitações aguardando aprovação.",
+            "url": url_for(
+                "loan_bp.list_loans",
+                status=LoanStatus.PENDENTE_APROVACAO.value,
+            ),
+            "level": "warning",
+        })
+
+    if pending_validation_count > 0:
+        attention_items.append({
+            "title": "Validações pendentes",
+            "count": pending_validation_count,
+            "description": "Há equipamentos emprestados pendentes de validação.",
+            "url": url_for("loan_bp.list_loans", validacao="PENDENTE"),
+            "level": "warning",
+        })
+
+    if external_pending_count > 0:
+        attention_items.append({
+            "title": "Pendências externas",
+            "count": external_pending_count,
+            "description": "Há e-mails, PDFs ou exportações aguardando processamento.",
+            "url": url_for("external_pending_bp.external_pending_page"),
+            "level": "warning",
+        })
+
+    if sync_pending_count > 0:
+        attention_items.append({
+            "title": "Sincronizações pendentes",
+            "count": sync_pending_count,
+            "description": "Há falhas pendentes de sincronização com a planilha.",
+            "url": url_for("sync_bp.sync_pending_page"),
+            "level": "danger",
+        })
+
     available_equipment = Equipment.query.filter_by(
         status=EquipmentStatus.DISPONIVEL.value
     ).count()
@@ -100,16 +164,75 @@ def dashboard():
 
     external_pending_count = ExternalPendingService.count_active_pendings()
 
+    external_pending_count = ExternalPendingService.count_active_pendings()
+    sync_pending_count = SyncPendingService.count_active_pendings()
+
+    overdue_count = (
+        Loan.query
+        .filter(Loan.status == LoanStatus.ATRASADO.value)
+        .count()
+    )
+
+    attention_items = []
+
+    if overdue_count > 0:
+        attention_items.append({
+            "title": "Empréstimos atrasados",
+            "count": overdue_count,
+            "description": "Há empréstimos com prazo de devolução vencido.",
+            "url": url_for("loan_bp.overdue_report"),
+            "level": "danger",
+        })
+
+    if pending_approval_count > 0:
+        attention_items.append({
+            "title": "Aprovações pendentes",
+            "count": pending_approval_count,
+            "description": "Há solicitações aguardando aprovação.",
+            "url": url_for("loan_bp.list_loans", status=LoanStatus.PENDENTE_APROVACAO.value),
+            "level": "warning",
+        })
+
+    if pending_validation_count > 0:
+        attention_items.append({
+            "title": "Validações pendentes",
+            "count": pending_validation_count,
+            "description": "Há equipamentos emprestados pendentes de validação.",
+            "url": url_for("loan_bp.list_loans", validacao="PENDENTE"),
+            "level": "warning",
+        })
+
+    if external_pending_count > 0:
+        attention_items.append({
+            "title": "Pendências externas",
+            "count": external_pending_count,
+            "description": "Há e-mails, PDFs ou exportações aguardando processamento.",
+            "url": url_for("external_pending_bp.external_pending_page"),
+            "level": "warning",
+        })
+
+    if sync_pending_count > 0:
+        attention_items.append({
+            "title": "Sincronizações pendentes",
+            "count": sync_pending_count,
+            "description": "Há falhas pendentes de sincronização com a planilha.",
+            "url": url_for("sync_bp.sync_pending_page"),
+            "level": "danger",
+        })
+
     return render_template(
         "dashboard.html",
         borrowed_loans=borrowed_loans,
         pending_approval_loans=pending_approval_loans,
         pending_validation_loans=pending_validation_loans,
-        borrowed_count=len(borrowed_loans),
-        pending_approval_count=len(pending_approval_loans),
-        pending_validation_count=len(pending_validation_loans),
+        borrowed_count=borrowed_count,
+        pending_approval_count=pending_approval_count,
+        pending_validation_count=pending_validation_count,
         available_equipment=available_equipment,
-                external_pending_count=external_pending_count,
+        external_pending_count=external_pending_count,
+        sync_pending_count=sync_pending_count,
+        overdue_count=overdue_count,
+        attention_items=attention_items,
         last_validation_check=last_validation_check,
     )
 

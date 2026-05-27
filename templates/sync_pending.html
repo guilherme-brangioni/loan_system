@@ -51,7 +51,11 @@
             <td>{{ pending.entity_id }}</td>
             <td>{{ pending.action }}</td>
             <td>{{ pending.target }}</td>
-            <td>{{ pending.status }}</td>
+            <td>
+                <span class="status-badge {{ status_badge_class(pending.status) }}">
+                    {{ format_status_label(pending.status) }}
+                </span>
+            </td>
             <td>{{ pending.attempts }}</td>
             <td>
                 <pre>{{ pending.last_error or "-" }}</pre>

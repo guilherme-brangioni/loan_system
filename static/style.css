@@ -995,3 +995,172 @@ td small {
         justify-content: center;
     }
 }
+
+/* =========================================================
+   STATUS BADGES PADRONIZADOS
+   ========================================================= */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 26px;
+    padding: 4px 10px;
+
+    border-radius: 999px;
+    border: 1px solid transparent;
+
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+
+    white-space: nowrap;
+}
+
+.status-success {
+    background: #dcfce7;
+    color: #166534;
+    border-color: #86efac;
+}
+
+.status-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fcd34d;
+}
+
+.status-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: #fecaca;
+}
+
+.status-info {
+    background: #d1fae5;
+    color: #064e3b;
+    border-color: #10b981;
+}
+
+.status-neutral {
+    background: #e5e7eb;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+/* =========================================================
+   DASHBOARD - ATENÇÃO NECESSÁRIA
+   ========================================================= */
+
+.attention-section {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 16px 0 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.attention-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 14px;
+}
+
+.attention-header h3 {
+    margin: 0;
+}
+
+.attention-header span {
+    font-size: 13px;
+    font-weight: 700;
+    color: #4b5563;
+}
+
+.attention-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.attention-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+
+    background: #f9fafb;
+    color: #111827;
+    text-decoration: none;
+}
+
+.attention-card:hover {
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.attention-count {
+    min-width: 42px;
+    min-height: 42px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    background: white;
+}
+
+.attention-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.attention-content strong {
+    font-size: 14px;
+}
+
+.attention-content small {
+    font-size: 12px;
+    color: #4b5563;
+}
+
+.attention-warning {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.attention-warning .attention-count {
+    color: #92400e;
+    border: 1px solid #fcd34d;
+}
+
+.attention-danger {
+    border-color: #dc2626;
+    background: #fef2f2;
+}
+
+.attention-danger .attention-count {
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.attention-info {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.attention-info .attention-count {
+    color: #064e3b;
+    border: 1px solid #86efac;
+}

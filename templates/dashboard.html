@@ -70,6 +70,35 @@
 </section>
 {% endif %}
 
+{% if attention_items %}
+<section class="attention-section">
+
+    <div class="attention-header">
+        <h3>Atenção necessária</h3>
+        <span>{{ attention_items|length }} item(ns)</span>
+    </div>
+
+    <div class="attention-grid">
+        {% for item in attention_items %}
+        <a
+            class="attention-card attention-{{ item.level }}"
+            href="{{ item.url }}"
+        >
+            <div class="attention-count">
+                {{ item.count }}
+            </div>
+
+            <div class="attention-content">
+                <strong>{{ item.title }}</strong>
+                <small>{{ item.description }}</small>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+</section>
+{% endif %}
+
 <p class="hint">
     O Dashboard mostra apenas empréstimos ativos, pendentes de aprovação e pendentes de validação.
     Empréstimos finalizados/devolvidos não aparecem aqui.
@@ -120,7 +149,11 @@
                 {% endfor %}
             </td>
 
-            <td>{{ loan.status }}</td>
+            <td>
+                <span class="status-badge {{ status_badge_class(loan.status) }}">
+                    {{ format_status_label(loan.status) }}
+                </span>
+            </td>
 
             <td>
                 {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
@@ -232,8 +265,12 @@
                 {% endfor %}
             </td>
 
-            <td>{{ loan.status }}</td>
-
+            <td>
+                <span class="status-badge {{ status_badge_class(loan.status) }}">
+                    {{ format_status_label(loan.status) }}
+                </span>
+            </td>
+            
             <td>
                 <form
                     method="post"

@@ -203,3 +203,20 @@ class SyncPendingService:
             "success": success,
             "failed": failed,
         }
+    
+    @staticmethod
+    def count_active_pendings() -> int:
+        """
+        Conta pendências de sincronização ainda não resolvidas.
+        """
+
+        return (
+            SyncPending.query
+            .filter(
+                SyncPending.status.in_([
+                    SyncPendingService.STATUS_PENDENTE,
+                    SyncPendingService.STATUS_ERRO,
+                ])
+            )
+            .count()
+        )
