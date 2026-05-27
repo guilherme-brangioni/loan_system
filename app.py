@@ -19,6 +19,7 @@ from routes.sync_routes import sync_bp
 from routes.settings_routes import settings_bp
 from routes.diagnostic_routes import diagnostic_bp
 from routes.external_pending_routes import external_pending_bp
+from routes.approval_routes import approval_bp
 
 
 def create_app(config_override: dict | None = None):
@@ -45,14 +46,27 @@ def create_app(config_override: dict | None = None):
     app.register_blueprint(settings_bp)
     app.register_blueprint(diagnostic_bp)
     app.register_blueprint(external_pending_bp)
+    app.register_blueprint(approval_bp)
 
     @app.context_processor
     def inject_current_user():
         from services.auth_service import AuthService
+        from services.approval_service import ApprovalService
         from utils.status_ui import format_status_label, status_badge_class
 
+        current_user = AuthService.get_current_user()
+
+        approval_pending_count = 0
+
+        if current_user:
+            try:
+                approval_pending_count = ApprovalService.count_pending_for_current_user()
+            except Exception:
+                approval_pending_count = 0
+
         return {
-            "current_user": AuthService.get_current_user(),
+            "current_user": current_user,
+            "approval_pending_count": approval_pending_count,
             "status_badge_class": status_badge_class,
             "format_status_label": format_status_label,
         }
@@ -70,6 +84,7 @@ def create_app(config_override: dict | None = None):
             "auth_bp.logout",
             "auth_bp.setup_first_admin",
             "loan_bp.verify_loan_document",
+            "loan_bp.approve_loan",
         }
 
         if endpoint in public_endpoints:
@@ -113,6 +128,8 @@ def create_app(config_override: dict | None = None):
         # Perfil CONSULTA pode navegar, mas não executar ações POST.
         allowed_post_for_consulta = {
             "auth_bp.change_password",
+            "approval_bp.approve_loan",
+            "approval_bp.reject_loan",
         }
 
         if (

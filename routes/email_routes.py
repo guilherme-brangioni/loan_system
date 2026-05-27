@@ -17,6 +17,7 @@ from services.notification_recipient_service import NotificationRecipientService
 from services.email_log_service import EmailLogService
 from services.email_service import EmailService
 from services.pdf_service import PDFService
+from services.app_setting_service import AppSettingService
 
 
 email_bp = Blueprint("email_bp", __name__, url_prefix="/emails")
@@ -53,17 +54,18 @@ def resend_approval_email(loan_id: int):
 
     approver = cast(Approver, loan.approver)
 
-    review_url = (
-        current_app.config["APP_BASE_URL"]
-        + url_for(
-            "loan_bp.review_approval",
-            token=loan.approval_token,
-        )
+    base_url = AppSettingService.get(
+        "APP_BASE_URL",
+        current_app.config.get("APP_BASE_URL", "http://127.0.0.1:5000"),
     )
+
+    base_url = str(base_url or "http://127.0.0.1:5000").strip().rstrip("/")
+
+    approval_url = f"{base_url}{url_for('approval_bp.my_approvals')}"
 
     body = EmailService.build_approval_body(
         loan,
-        review_url,
+        approval_url,
     )
 
     subject = f"Aprovação de empréstimo - {loan.numero_controle}"

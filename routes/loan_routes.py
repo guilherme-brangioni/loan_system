@@ -290,17 +290,17 @@ def new_loan():
                 created_by=loan.responsavel_entrega_nome,
             )
 
-            review_url = (
+            approval_url = (
                 current_app.config["APP_BASE_URL"]
                 + url_for(
-                    "loan_bp.review_approval",
-                    token=loan.approval_token,
+                    "approval_bp.my_approvals",
+                    _external=True,
                 )
             )
 
             body = EmailService.build_approval_body(
                 loan,
-                review_url,
+                approval_url,
             )
 
             result = EmailService.try_send_email(

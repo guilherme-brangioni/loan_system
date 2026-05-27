@@ -2,7 +2,26 @@
 
 {% block content %}
 
-<h2>Empréstimo {{ loan.numero_controle }}</h2>
+<p>
+    <strong>Controle do Empréstimo:</strong>
+
+    <span class="copy-control-wrapper">
+        <span>{{ loan.numero_controle }}</span>
+
+        <button
+            type="button"
+            class="copy-control-button"
+            onclick="copyToClipboard('{{ loan.numero_controle }}', 'copy-feedback-loan-{{ loan.id }}')"
+        >
+            Copiar
+        </button>
+
+        <span
+            id="copy-feedback-loan-{{ loan.id }}"
+            class="copy-feedback"
+        ></span>
+    </span>
+</p>
 
 <section class="detail-grid">
     <div>
@@ -105,7 +124,11 @@
 
 <section class="actions">
     {% if loan.status == "APROVADO" %}
-    <form method="post" action="{{ url_for('loan_bp.confirm_withdrawal', loan_id=loan.id) }}">
+    <form 
+        method="post"
+        action="{{ url_for('loan_bp.confirm_withdrawal', loan_id=loan.id) }}"
+        onsubmit="return confirm('Confirmar retirada/coleta do empréstimo {{ loan.numero_controle }}? Os equipamentos serão marcados como emprestados.');"
+    >
         <button type="submit">Confirmar retirada</button>
     </form>
     {% endif %}
@@ -120,7 +143,7 @@
     <form
         method="post"
         action="{{ url_for('loan_bp.return_all_items', loan_id=loan.id) }}"
-        onsubmit="return confirm('Confirmar devolução total deste empréstimo?');"
+        onsubmit="return confirm('Confirmar devolução total do empréstimo {{ loan.numero_controle }}? Esta ação marcará todos os itens como devolvidos e liberará os equipamentos.');"
     >
         <input
             type="text"
@@ -149,6 +172,7 @@
     <form
         method="post"
         action="{{ url_for('email_bp.resend_receipt_email', loan_id=loan.id) }}"
+        onsubmit="return confirm('Reenviar o comprovante do empréstimo {{ loan.numero_controle }} para todos os destinatários configurados?');"
     >
         <button type="submit">Reenviar comprovante</button>
     </form>
@@ -177,7 +201,7 @@
     <form
         method="post"
         action="{{ url_for('loan_bp.validate_loan_equipments', loan_id=loan.id) }}"
-        onsubmit="return confirm('Confirmar validação dos equipamentos deste empréstimo?');"
+        onsubmit="return confirm('Confirmar validação dos equipamentos do empréstimo {{ loan.numero_controle }}?');"
     >
         <input
             type="text"

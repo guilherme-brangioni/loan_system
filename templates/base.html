@@ -33,6 +33,13 @@
                                 Empréstimos
                             </a>
 
+                            <a href="{{ url_for('approval_bp.my_approvals') }}">
+                                Aprovações
+                                {% if approval_pending_count > 0 %}
+                                    <span class="nav-badge">{{ approval_pending_count }}</span>
+                                {% endif %}
+                            </a>
+
                             {% if current_user.role in ["ADMIN", "OPERADOR"] %}
                             <a href="{{ url_for('loan_bp.new_loan') }}">
                                 Novo Empréstimo
@@ -189,5 +196,24 @@
 
         {% block content %}{% endblock %}
     </main>
+
+    <script>
+        function copyToClipboard(text, feedbackId) {
+            navigator.clipboard.writeText(text).then(function () {
+                const feedback = document.getElementById(feedbackId);
+
+                if (feedback) {
+                    feedback.textContent = "Copiado!";
+
+                    setTimeout(function () {
+                        feedback.textContent = "";
+                    }, 1800);
+                }
+            }).catch(function () {
+                alert("Não foi possível copiar o texto.");
+            });
+        }
+    </script>
+
 </body>
 </html>

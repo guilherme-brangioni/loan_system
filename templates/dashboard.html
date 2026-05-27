@@ -122,7 +122,24 @@
     <tbody>
         {% for loan in borrowed_loans %}
         <tr>
-            <td><strong>{{ loan.numero_controle }}</strong></td>
+            <td>
+                <div class="copy-control-wrapper">
+                    <strong>{{ loan.numero_controle }}</strong>
+
+                    <button
+                        type="button"
+                        class="copy-control-button"
+                        onclick="copyToClipboard('{{ loan.numero_controle }}', 'copy-feedback-dashboard-{{ loan.id }}')"
+                    >
+                        Copiar
+                    </button>
+
+                    <span
+                        id="copy-feedback-dashboard-{{ loan.id }}"
+                        class="copy-feedback"
+                    ></span>
+                </div>
+            </td>
 
             <td>
                 {{ loan.user.nome }}

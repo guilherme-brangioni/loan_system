@@ -162,7 +162,7 @@ class EmailService:
             }
 
     @staticmethod
-    def build_approval_body(loan, review_url: str) -> str:
+    def build_approval_body(loan, approval_url: str) -> str:
         """
         Monta o corpo do e-mail de aprovação.
 
@@ -188,9 +188,10 @@ class EmailService:
 
         items_text = "\n".join(item_lines) or "- Nenhum item informado"
 
-        return f"""Olá,
+        return f"""
+Olá,
 
-Existe uma solicitação de empréstimo pendente de aprovação.
+Existe uma solicitação de empréstimo aguardando sua aprovação.
 
 Número de controle:
 {loan.numero_controle}
@@ -198,29 +199,12 @@ Número de controle:
 Solicitante:
 {loan.user.nome}
 
-Matrícula:
-{loan.user.matricula}
+Para aprovar ou rejeitar, acesse o sistema pelo link abaixo:
 
-Gerência:
-{loan.user.gerencia or "Não informado"}
+{approval_url}
 
-Regional:
-{loan.user.regional or "Não informado"}
-
-Equipe:
-{loan.user.equipe or "Não informado"}
-
-Local de utilização:
-{loan.local_utilizacao or "Não informado"}
-
-Data prevista de devolução:
-{loan.data_prevista_devolucao.strftime("%d/%m/%Y")}
-
-Itens solicitados:
-{items_text}
-
-Para revisar, aprovar ou rejeitar a solicitação, acesse:
-{review_url}
+Após entrar no sistema, abra o menu:
+Empréstimos > Aprovações
 
 Atenciosamente,
 AT/PM - Gestão de Empréstimos e Sobressalentes

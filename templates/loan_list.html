@@ -99,7 +99,22 @@
 
         <tr>
             <td>
-                <strong>{{ loan.numero_controle }}</strong>
+                <div class="copy-control-wrapper">
+                    <strong>{{ loan.numero_controle }}</strong>
+
+                    <button
+                        type="button"
+                        class="copy-control-button"
+                        onclick="copyToClipboard('{{ loan.numero_controle }}', 'copy-feedback-list-{{ loan.id }}')"
+                    >
+                        Copiar
+                    </button>
+
+                    <span
+                        id="copy-feedback-list-{{ loan.id }}"
+                        class="copy-feedback"
+                    ></span>
+                </div>
             </td>
 
             <td>
