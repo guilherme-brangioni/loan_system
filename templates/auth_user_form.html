@@ -10,6 +10,8 @@
 
 <form method="post" class="form-card">
 
+    <h3>Dados Pessoais</h3>
+
     <label for="nome">Nome</label>
     <input
         type="text"
@@ -27,6 +29,60 @@
         value="{{ user.email if user else '' }}"
         required
     >
+
+    <h3>Dados funcionais</h3>
+
+    <div class="form-grid-3">
+        <div>
+            <label for="matricula">Matrícula</label>
+            <input
+                type="text"
+                id="matricula"
+                name="matricula"
+                value="{{ user.matricula if user else '' }}"
+            >
+        </div>
+
+        <div>
+            <label for="telefone">Telefone</label>
+            <input
+                type="text"
+                id="telefone"
+                name="telefone"
+                value="{{ user.telefone if user else '' }}"
+            >
+        </div>
+
+        <div>
+            <label for="gerencia">Gerência</label>
+            <input
+                type="text"
+                id="gerencia"
+                name="gerencia"
+                value="{{ user.gerencia if user else '' }}"
+            >
+        </div>
+
+        <div>
+            <label for="regional">Regional</label>
+            <input
+                type="text"
+                id="regional"
+                name="regional"
+                value="{{ user.regional if user else '' }}"
+            >
+        </div>
+
+        <div>
+            <label for="equipe">Equipe</label>
+            <input
+                type="text"
+                id="equipe"
+                name="equipe"
+                value="{{ user.equipe if user else '' }}"
+            >
+        </div>
+    </div>
 
     <label for="role">Perfil</label>
     <select id="role" name="role" required>

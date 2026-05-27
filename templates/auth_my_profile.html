@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Meu perfil</h2>
+
+<section class="form-card">
+
+    <h3>Dados do usuário</h3>
+
+    <div class="detail-grid">
+
+        <div>
+            <p>
+                <strong>Nome:</strong>
+                {{ user.nome or "-" }}
+            </p>
+
+            <p>
+                <strong>E-mail:</strong>
+                {{ user.email or "-" }}
+            </p>
+
+            <p>
+                <strong>Perfil:</strong>
+                <span class="status-badge status-info">
+                    {{ user.role or "-" }}
+                </span>
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+
+                {% if user.active %}
+                    <span class="status-badge status-success">
+                        Ativo
+                    </span>
+                {% else %}
+                    <span class="status-badge status-danger">
+                        Inativo
+                    </span>
+                {% endif %}
+            </p>
+        </div>
+
+        <div>
+            <p>
+                <strong>Matrícula:</strong>
+                {{ user.matricula or "-" }}
+            </p>
+
+            <p>
+                <strong>Telefone:</strong>
+                {{ user.telefone or "-" }}
+            </p>
+
+            <p>
+                <strong>Gerência:</strong>
+                {{ user.gerencia or "-" }}
+            </p>
+
+            <p>
+                <strong>Regional:</strong>
+                {{ user.regional or "-" }}
+            </p>
+
+            <p>
+                <strong>Equipe:</strong>
+                {{ user.equipe or "-" }}
+            </p>
+        </div>
+
+    </div>
+
+    <div class="actions">
+        <a
+            class="button"
+            href="{{ url_for('auth_bp.change_password') }}"
+        >
+            Alterar senha
+        </a>
+
+        <a
+            class="button secondary"
+            href="{{ url_for('main_bp.dashboard') }}"
+        >
+            Voltar ao Dashboard
+        </a>
+    </div>
+
+</section>
+
+{% endblock %}

@@ -159,6 +159,11 @@ def new_user():
                 password=form_data.get("password", ""),
                 role=form_data.get("role", ""),
                 active=form_data.get("active") == "on",
+                matricula=form_data.get("matricula", ""),
+                telefone=form_data.get("telefone", ""),
+                gerencia=form_data.get("gerencia", ""),
+                regional=form_data.get("regional", ""),
+                equipe=form_data.get("equipe", ""),
             )
 
             flash("Usuário criado com sucesso.", "success")
@@ -213,6 +218,12 @@ def edit_user(user_id: int):
             user.email = email
             user.role = role
             user.active = form_data.get("active") == "on"
+            
+            user.matricula = form_data.get("matricula", "").strip()
+            user.telefone = form_data.get("telefone", "").strip()
+            user.gerencia = form_data.get("gerencia", "").strip()
+            user.regional = form_data.get("regional", "").strip()
+            user.equipe = form_data.get("equipe", "").strip()
 
             new_password = form_data.get("password", "").strip()
 
@@ -400,3 +411,20 @@ def reset_user_password(user_id: int):
         )
 
     return redirect(url_for("auth_bp.list_users"))
+
+@auth_bp.route("/meu-perfil")
+def my_profile():
+    """
+    Exibe dados do usuário logado.
+    """
+
+    user = AuthService.get_current_user()
+
+    if not user:
+        flash("Faça login para acessar seu perfil.", "error")
+        return redirect(url_for("auth_bp.login"))
+
+    return render_template(
+        "auth_my_profile.html",
+        user=user,
+    )

@@ -31,11 +31,21 @@ class AuthService:
         password: str,
         role: str,
         active: bool = True,
-    ) -> SystemUser:
+        matricula: str = "",
+        telefone: str = "",
+        gerencia: str = "",
+        regional: str = "",
+        equipe: str = "",
+    )-> SystemUser:
         nome = str(nome or "").strip()
         email = AuthService.normalize_email(email)
         password = str(password or "").strip()
         role = str(role or "").strip().upper()
+        matricula = str(matricula or "").strip()
+        telefone = str(telefone or "").strip()
+        gerencia = str(gerencia or "").strip()
+        regional = str(regional or "").strip()
+        equipe = str(equipe or "").strip()
 
         if not nome:
             raise ValueError("Nome é obrigatório.")
@@ -60,6 +70,12 @@ class AuthService:
         user.email = email
         user.role = role
         user.active = active
+        user.matricula = str(matricula or "").strip()
+        user.telefone = str(telefone or "").strip()
+        user.gerencia = str(gerencia or "").strip()
+        user.regional = str(regional or "").strip()
+        user.equipe = str(equipe or "").strip()
+        
         user.set_password(password)
 
         db.session.add(user)

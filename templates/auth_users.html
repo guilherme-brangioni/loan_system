@@ -15,10 +15,15 @@
         <tr>
             <th>Nome</th>
             <th>E-mail</th>
-            <th>Senha</th>
+            <th>Matrícula</th>
+            <th>Gerência</th>
+            <th>Regional</th>
+            <th>Equipe</th>
+            <th>Status</th>
             <th>Perfil</th>
             <th>Ativo</th>
             <th>Último login</th>
+            <th>Ações</th>
             <th></th>
         </tr>
     </thead>
@@ -26,8 +31,12 @@
     <tbody>
         {% for user in users %}
         <tr>
-            <td>{{ user.nome }}</td>
+            <td><strong>{{ user.nome }}</strong></td>
             <td>{{ user.email }}</td>
+            <td>{{ user.matricula or "-" }}</td>
+            <td>{{ user.gerencia or "-" }}</td>
+            <td>{{ user.regional or "-" }}</td>
+            <td>{{ user.equipe or "-" }}</td>
             <td>
                 {% if user.must_change_password %}
                     <span class="status-badge status-warning">
@@ -46,25 +55,26 @@
             </td>
             
             <td>
-                <form
-                    method="post"
-                    action="{{ url_for('auth_bp.reset_user_password', user_id=user.id) }}"
-                    onsubmit="return confirm('Gerar senha temporária e enviar para {{ user.email }}?');"
-                    style="display: inline;"
-                >
-                    <button type="submit" class="secondary-button">
-                        Resetar Senha
-                    </button>
-                </form>
-                <form
-                    method="post"
-                    action="{{ url_for('auth_bp.edit_user', user_id=user.id) }}"
-                    style="display: inline;"
-                >
-                    <button type="submit" class="secondary-button">
+                <div class="user-actions">
+
+                    <form
+                        method="post"
+                        action="{{ url_for('auth_bp.reset_user_password', user_id=user.id) }}"
+                        onsubmit="return confirm('Gerar senha temporária e enviar para {{ user.email }}?');"
+                    >
+                        <button type="submit" class="secondary-button">
+                            Resetar Senha
+                        </button>
+                    </form>
+
+                    <a
+                        class="button secondary"
+                        href="{{ url_for('auth_bp.edit_user', user_id=user.id) }}"
+                    >
                         Editar Usuário
-                    </button>
-                </form>
+                    </a>
+
+                </div>
             </td>
         </tr>
         {% endfor %}

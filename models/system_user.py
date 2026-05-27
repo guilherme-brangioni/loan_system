@@ -27,6 +27,16 @@ class SystemUser(db.Model):
 
     active = db.Column(db.Boolean, default=True)
 
+    matricula = db.Column(db.String(20))
+
+    telefone = db.Column(db.String(20))
+
+    gerencia = db.Column(db.String(10))
+
+    regional = db.Column(db.String(20))
+
+    equipe = db.Column(db.String(255))
+
     must_change_password = db.Column(
         db.Boolean,
         nullable=False,
