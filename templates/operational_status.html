@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Status operacional</h2>
+
+<p class="hint">
+    Visão rápida dos principais pontos de atenção do sistema no uso diário.
+</p>
+
+<section class="operational-summary-grid">
+
+    {% for card in status_data.summary_cards %}
+        <a
+            class="operational-card operational-{{ card.level }}"
+            href="{{ url_for(card.url_endpoint, **(card.url_params or {})) }}"
+        >
+            <div class="operational-card-count">
+                {{ card.count }}
+            </div>
+
+            <div class="operational-card-content">
+                <strong>{{ card.title }}</strong>
+                <small>{{ card.description }}</small>
+            </div>
+        </a>
+    {% endfor %}
+
+</section>
+
+<section class="operational-section">
+
+    <div class="operational-section-header">
+        <h3>Backups</h3>
+    </div>
+
+    {% set backup = status_data.backup_status %}
+
+    <div class="operational-status-line operational-{{ backup.status }}">
+        <strong>{{ backup.message }}</strong>
+
+        {% if backup.age_days is defined and backup.age_days is not none %}
+            <span>
+                Idade do backup: {{ backup.age_days }} dia(s)
+            </span>
+        {% endif %}
+
+        {% if backup.automatic_backup %}
+            <small>
+                Caminho:
+                {{ backup.automatic_backup.path if backup.automatic_backup.path is defined else backup.automatic_backup["path"] }}
+            </small>
+        {% endif %}
+
+        {% if backup.error %}
+            <small>{{ backup.error }}</small>
+        {% endif %}
+    </div>
+
+</section>
+
+<section class="operational-section">
+
+    <div class="operational-section-header">
+        <h3>Pendências externas com erro</h3>
+
+        <a class="button secondary" href="{{ url_for('external_pending_bp.external_pending_page') }}">
+            Abrir pendências externas
+        </a>
+    </div>
+
+    {% set external = status_data.external_pending_status %}
+
+    {% if external.latest_errors %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Ação</th>
+                    <th>Entidade</th>
+                    <th>Tentativas</th>
+                    <th>Última tentativa</th>
+                    <th>Erro</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for pending in external.latest_errors %}
+                <tr>
+                    <td>#{{ pending.id }}</td>
+                    <td>{{ pending.action }}</td>
+                    <td>{{ pending.entity_type }} #{{ pending.entity_id }}</td>
+                    <td>{{ pending.attempts or 0 }} / {{ pending.max_attempts or "-" }}</td>
+                    <td>{{ pending.last_attempt_at.strftime("%d/%m/%Y %H:%M") if pending.last_attempt_at else "-" }}</td>
+                    <td>
+                        {% if pending.last_error %}
+                            <details>
+                                <summary>Ver erro</summary>
+                                <pre>{{ pending.last_error }}</pre>
+                            </details>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="hint">Nenhuma pendência externa com erro.</p>
+    {% endif %}
+
+</section>
+
+<section class="operational-section">
+
+    <div class="operational-section-header">
+        <h3>Empréstimos atrasados</h3>
+
+        <a class="button secondary" href="{{ url_for('loan_bp.overdue_report') }}">
+            Abrir relatório de atrasos
+        </a>
+    </div>
+
+    {% set loan_status = status_data.loan_status %}
+
+    {% if loan_status.overdue_loans %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Controle</th>
+                    <th>Solicitante</th>
+                    <th>Previsão devolução</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for loan in loan_status.overdue_loans %}
+                <tr>
+                    <td>
+                        <strong>{{ loan.numero_controle }}</strong>
+                    </td>
+
+                    <td>
+                        {{ loan.user.nome if loan.user else "-" }}
+                    </td>
+
+                    <td>
+                        {{ loan.data_prevista_devolucao.strftime("%d/%m/%Y") if loan.data_prevista_devolucao else "-" }}
+                    </td>
+
+                    <td>
+                        <span class="status-badge {{ status_badge_class(loan.status) }}">
+                            {{ format_status_label(loan.status) }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                            Abrir
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="hint">Nenhum empréstimo atrasado.</p>
+    {% endif %}
+
+</section>
+
+<section class="operational-section">
+
+    <div class="operational-section-header">
+        <h3>Aprovações pendentes</h3>
+
+        <a class="button secondary" href="{{ url_for('approval_bp.my_approvals') }}">
+            Abrir aprovações
+        </a>
+    </div>
+
+    {% if loan_status.pending_approval_loans %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Controle</th>
+                    <th>Solicitante</th>
+                    <th>Aprovador</th>
+                    <th>Criado em</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for loan in loan_status.pending_approval_loans %}
+                <tr>
+                    <td>
+                        <strong>{{ loan.numero_controle }}</strong>
+                    </td>
+
+                    <td>
+                        {{ loan.user.nome if loan.user else "-" }}
+                    </td>
+
+                    <td>
+                        {{ loan.approver.nome if loan.approver else "-" }}
+                    </td>
+
+                    <td>
+                        {{ loan.created_at.strftime("%d/%m/%Y %H:%M") if loan.created_at else "-" }}
+                    </td>
+
+                    <td>
+                        <a href="{{ url_for('loan_bp.loan_detail', loan_id=loan.id) }}">
+                            Abrir
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="hint">Nenhuma aprovação pendente.</p>
+    {% endif %}
+
+</section>
+
+<section class="operational-section">
+
+    <div class="operational-section-header">
+        <h3>Últimos e-mails com falha</h3>
+
+        <a class="button secondary" href="{{ url_for('email_bp.email_logs') }}">
+            Abrir e-mails
+        </a>
+    </div>
+
+    {% set email_status = status_data.email_status %}
+
+    {% if email_status.latest_failed_emails %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Empréstimo</th>
+                    <th>Assunto</th>
+                    <th>Data</th>
+                    <th>Erro</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for log in email_status.latest_failed_emails %}
+                <tr>
+                    <td>{{ log.email_type or "-" }}</td>
+                    <td>{{ log.loan_id or "-" }}</td>
+                    <td>
+                        <small>{{ log.subject or "-" }}</small>
+                    </td>
+                    <td>
+                        {{ log.created_at.strftime("%d/%m/%Y %H:%M") if log.created_at else "-" }}
+                    </td>
+                    <td>
+                        {% if log.error %}
+                            <details>
+                                <summary>Ver erro</summary>
+                                <pre>{{ log.error }}</pre>
+                            </details>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="hint">Nenhuma falha de e-mail registrada recentemente.</p>
+    {% endif %}
+
+</section>
+
+{% endblock %}

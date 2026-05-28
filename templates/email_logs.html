@@ -25,13 +25,23 @@
     <tbody>
         {% for log in logs %}
         <tr>
-            <td>{{ log.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
-            <td>{{ log.email_type }}</td>
-            <td>{{ log.loan_id or "-" }}</td>
-            <td><pre>{{ log.recipients }}</pre></td>
-            <td>{{ log.subject }}</td>
-            <td>{{ "Sim" if log.success else "Não" }}</td>
-            <td><pre>{{ log.error or "-" }}</pre></td>
+            <td style="text-align: center;">{{ log.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+            <td style="text-align: center;">{{ log.email_type }}</td>
+            <td style="text-align: center;">{{ log.loan_id or "-" }}</td>
+            <td class="email-recipients-cell" style="text-align: center;">
+                {% if log.recipient_display_list %}
+                    {% for recipient_name in log.recipient_display_list %}
+                        <span class="email-recipient-line">
+                            {{ recipient_name }}
+                        </span>
+                    {% endfor %}
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+            <td style="text-align: center;">{{ log.subject }}</td>
+            <td style="text-align: center;">{{ "Sim" if log.success else "Não" }}</td>
+            <td style="text-align: center;"><pre>{{ log.error or "-" }}</pre></td>
         </tr>
         {% endfor %}
     </tbody>

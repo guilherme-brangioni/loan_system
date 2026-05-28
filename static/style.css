@@ -2155,3 +2155,188 @@ button:disabled {
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================================
+   STATUS OPERACIONAL
+   ========================================================= */
+
+.operational-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin: 18px 0 24px;
+}
+
+.operational-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid #d1d5db;
+
+    background: white;
+    color: #111827;
+    text-decoration: none;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.operational-card:hover {
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.operational-card-count {
+    min-width: 46px;
+    min-height: 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+
+    background: #f3f4f6;
+
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.operational-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.operational-card-content strong {
+    font-size: 14px;
+}
+
+.operational-card-content small {
+    color: #4b5563;
+    font-size: 12px;
+}
+
+.operational-success {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.operational-success .operational-card-count {
+    color: #064e3b;
+    background: white;
+    border: 1px solid #86efac;
+}
+
+.operational-warning {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.operational-warning .operational-card-count {
+    color: #92400e;
+    background: white;
+    border: 1px solid #fcd34d;
+}
+
+.operational-danger {
+    border-color: #dc2626;
+    background: #fef2f2;
+}
+
+.operational-danger .operational-card-count {
+    color: #991b1b;
+    background: white;
+    border: 1px solid #fecaca;
+}
+
+.operational-info {
+    border-color: #10b981;
+    background: #f9fafb;
+}
+
+.operational-section {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 18px 0 24px;
+
+    border-left: 5px solid #064e3b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    overflow-x: auto;
+}
+
+.operational-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.operational-section-header h3 {
+    margin: 0;
+}
+
+.operational-status-line {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+}
+
+.operational-status-line small,
+.operational-status-line span {
+    color: #4b5563;
+}
+
+.operational-status-line.operational-success {
+    border-color: #10b981;
+    background: #ecfdf5;
+}
+
+.operational-status-line.operational-warning {
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.operational-status-line.operational-danger {
+    border-color: #dc2626;
+    background: #fef2f2;
+}
+
+@media (max-width: 800px) {
+    .operational-section-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .operational-section-header .button {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* =========================================================
+   LOGS DE E-MAIL - DESTINATÁRIOS
+   ========================================================= */
+
+.email-recipients-cell {
+    line-height: 1.15;
+    vertical-align: middle;
+}
+
+.email-recipient-line {
+    display: block;
+    margin: 0;
+    padding: 0;
+    line-height: 1.25;
+    white-space: normal;
+}

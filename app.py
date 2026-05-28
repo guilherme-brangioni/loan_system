@@ -21,6 +21,7 @@ from routes.diagnostic_routes import diagnostic_bp
 from routes.external_pending_routes import external_pending_bp
 from routes.approval_routes import approval_bp
 from routes.search_routes import search_bp
+from routes.operational_status_routes import operational_status_bp
 
 
 def create_app(config_override: dict | None = None):
@@ -49,6 +50,7 @@ def create_app(config_override: dict | None = None):
     app.register_blueprint(external_pending_bp)
     app.register_blueprint(approval_bp)
     app.register_blueprint(search_bp)
+    app.register_blueprint(operational_status_bp)
 
     @app.context_processor
     def inject_current_user():
@@ -131,6 +133,7 @@ def create_app(config_override: dict | None = None):
             "settings_bp.",
             "diagnostic_bp.",
             "external_pending_bp.",
+            "operational_status_bp",
         ]
 
         admin_only_endpoints = {

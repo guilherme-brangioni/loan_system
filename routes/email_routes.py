@@ -18,6 +18,7 @@ from services.email_log_service import EmailLogService
 from services.email_service import EmailService
 from services.pdf_service import PDFService
 from services.app_setting_service import AppSettingService
+from services.recipient_display_service import RecipientDisplayService
 
 
 email_bp = Blueprint("email_bp", __name__, url_prefix="/emails")
@@ -27,14 +28,18 @@ email_bp = Blueprint("email_bp", __name__, url_prefix="/emails")
 def email_logs():
     """
     Lista as tentativas de envio de e-mail.
-
-    Mantemos esta tela porque ela é útil para auditoria e diagnóstico
-    quando algum envio falhar.
     """
 
     logs = EmailLog.query.order_by(
         EmailLog.created_at.desc()
     ).limit(300).all()
+
+    for log in logs:
+        log.recipient_display_list = (
+            RecipientDisplayService.display_recipient_names_list(
+                log.recipients
+            )
+        )
 
     return render_template(
         "email_logs.html",
