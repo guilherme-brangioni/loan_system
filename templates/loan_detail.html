@@ -56,6 +56,25 @@
             <strong>Local de utilização:</strong>
             {{ loan.local_utilizacao or "-" }}
         </p>
+
+        <div class="identification-actions" style="justify-content: center;">
+            <a
+                class="button secondary"
+                href="{{ url_for('loan_bp.loan_pdf', loan_id=loan.id) }}"
+            >
+                Baixar PDF
+            </a>
+
+            <form
+                method="post"
+                action="{{ url_for('email_bp.resend_receipt_email', loan_id=loan.id) }}"
+                onsubmit="return confirm('Reenviar o comprovante do empréstimo {{ loan.numero_controle }} para todos os destinatários configurados?');"
+            >
+                <button type="submit" class="secondary-button">
+                    Reenviar comprovante
+                </button>
+            </form>
+        </div>
     </div>
 
     <div>
@@ -134,130 +153,68 @@
 
     <div class="loan-actions-grid">
 
-        <a
-            class="button secondary"
-            href="{{ url_for('loan_bp.loan_pdf', loan_id=loan.id) }}"
-        >
-            Baixar PDF
-        </a>
+        <div class="loan-action-row">
 
-        <form
-            method="post"
-            action="{{ url_for('email_bp.resend_receipt_email', loan_id=loan.id) }}"
-            onsubmit="return confirm('Reenviar o comprovante do empréstimo {{ loan.numero_controle }} para todos os destinatários configurados?');"
-        >
-            <button type="submit" class="secondary-button">
-                Reenviar comprovante
-            </button>
-        </form>
+            {% if action_status in ["RETIRADO", "ATRASADO", "PARCIALMENTE_DEVOLVIDO"] %}
+                <a
+                    class="button secondary"
+                    href="{{ url_for('loan_bp.return_items', loan_id=loan.id) }}"
+                >
+                    Devolução parcial
+                </a>
 
-        {% if action_status == "PENDENTE_APROVACAO" %}
-            <a
-                class="button secondary"
-                href="{{ url_for('approval_bp.my_approvals') }}"
-            >
-                Abrir aprovações
-            </a>
-
-            {% if current_user and current_user.role in ["ADMIN", "OPERADOR"] %}
                 <form
                     method="post"
-                    action="{{ url_for('email_bp.resend_approval_email', loan_id=loan.id) }}"
-                    onsubmit="return confirm('Reenviar e-mail de aprovação do empréstimo {{ loan.numero_controle }} para o aprovador?');"
+                    action="{{ url_for('loan_bp.return_all_items', loan_id=loan.id) }}"
+                    onsubmit="return confirm('Confirmar devolução total do empréstimo {{ loan.numero_controle }}? Esta ação marcará todos os itens como devolvidos e liberará os equipamentos.');"
                 >
-                    <button type="submit" class="secondary-button">
-                        Reenviar e-mail de aprovação
+                    <input
+                        type="text"
+                        name="devolvido_por"
+                        placeholder="Devolvido por"
+                        required
+                    >
+
+                    <button type="submit">
+                        Marcar como devolvido
                     </button>
                 </form>
             {% endif %}
-        {% endif %}
-
-        {% if action_status == "APROVADO" %}
-            <form
-                method="post"
-                action="{{ url_for('loan_bp.confirm_withdrawal', loan_id=loan.id) }}"
-                onsubmit="return confirm('Confirmar retirada/coleta do empréstimo {{ loan.numero_controle }}? Os equipamentos serão marcados como emprestados.');"
-            >
-                <input
-                    type="text"
-                    name="performed_by"
-                    placeholder="Entregue/coletado por"
-                    required
-                >
-
-                <button type="submit">
-                    Confirmar retirada
-                </button>
-            </form>
-        {% endif %}
+        </div>
 
         {% if action_status in ["RETIRADO", "ATRASADO", "PARCIALMENTE_DEVOLVIDO"] %}
-            <a
-                class="button secondary"
-                href="{{ url_for('loan_bp.return_items', loan_id=loan.id) }}"
-            >
-                Devolução parcial
-            </a>
-
-            <form
-                method="post"
-                action="{{ url_for('loan_bp.return_all_items', loan_id=loan.id) }}"
-                onsubmit="return confirm('Confirmar devolução total do empréstimo {{ loan.numero_controle }}? Esta ação marcará todos os itens como devolvidos e liberará os equipamentos.');"
-            >
-                <input
-                    type="text"
-                    name="devolvido_por"
-                    placeholder="Devolvido por"
-                    required
+            <div class="loan-action-row">
+                <form
+                    method="post"
+                    action="{{ url_for('loan_bp.renew_loan', loan_id=loan.id) }}"
+                    onsubmit="return confirm('Confirmar renovação do empréstimo {{ loan.numero_controle }}?');"
                 >
+                    <input
+                        type="date"
+                        name="new_due_date"
+                        required
+                    >
 
-                <button type="submit">
-                    Marcar como devolvido
-                </button>
-            </form>
+                    <input
+                        type="text"
+                        name="reason"
+                        placeholder="Motivo da renovação"
+                    >
 
-            <form
-                method="post"
-                action="{{ url_for('loan_bp.renew_loan', loan_id=loan.id) }}"
-                onsubmit="return confirm('Confirmar renovação do empréstimo {{ loan.numero_controle }}?');"
-            >
-                <input
-                    type="date"
-                    name="new_due_date"
-                    required
-                >
+                    <button type="submit" class="secondary-button">
+                        Renovar
+                    </button>
+                </form>
 
-                <input
-                    type="text"
-                    name="reason"
-                    placeholder="Motivo da renovação"
-                >
-
-                <button type="submit" class="secondary-button">
-                    Renovar
-                </button>
-            </form>
-        {% endif %}
-
-        {% if ns.has_pending_validation and action_status not in ["FINALIZADO", "REJEITADO", "CANCELADO"] %}
-            <form
-                method="post"
-                action="{{ url_for('loan_bp.validate_loan_equipments', loan_id=loan.id) }}"
-                onsubmit="return confirm('Confirmar validação dos equipamentos do empréstimo {{ loan.numero_controle }}?');"
-            >
-                <button type="submit">
-                    Validar equipamentos
-                </button>
-            </form>
-        {% endif %}
-
-        {% if current_user and current_user.role in ["ADMIN", "OPERADOR"] %}
-            <a
-                class="button secondary"
-                href="{{ url_for('external_pending_bp.external_pending_page') }}"
-            >
-                Pendências externas
-            </a>
+                {% if current_user and current_user.role in ["ADMIN", "OPERADOR"] %}
+                    <a
+                        class="button secondary"
+                        href="{{ url_for('external_pending_bp.external_pending_page') }}"
+                    >
+                        Pendências externas
+                    </a>
+                {% endif %}
+            </div>
         {% endif %}
 
     </div>

@@ -521,11 +521,6 @@ td form input[type="text"] {
     width: 180px;
 }
 
-td form button {
-    display: block;
-}
-
-
 /* =========================================================
    EQUIPAMENTOS / EMPRÉSTIMOS
    ========================================================= */
@@ -1218,96 +1213,6 @@ td small {
     font-size: 12px;
     color: #166534;
     font-weight: 600;
-}
-
-/* =========================================================
-   DETALHE DO EMPRÉSTIMO - AÇÕES AGRUPADAS
-   ========================================================= */
-
-.loan-actions-card {
-    background: white;
-    border-radius: 14px;
-    padding: 18px;
-    margin: 18px 0 24px;
-
-    border-left: 5px solid #064e3b;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.loan-actions-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 16px;
-
-    margin-bottom: 16px;
-}
-
-.loan-actions-header h3 {
-    margin: 0 0 6px;
-}
-
-.loan-actions-header p {
-    margin: 0;
-    color: #4b5563;
-}
-
-.loan-actions-grid {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 12px;
-}
-
-.loan-actions-grid form {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-
-    margin: 0;
-}
-
-.loan-actions-grid input[type="text"],
-.loan-actions-grid input[type="date"] {
-    min-width: 180px;
-    height: 38px;
-}
-
-.secondary-button {
-    background: #6b7280;
-    color: white;
-}
-
-.secondary-button:hover {
-    background: #4b5563;
-}
-
-.danger-button {
-    background: #991b1b;
-    color: white;
-}
-
-.danger-button:hover {
-    background: #7f1d1d;
-}
-
-@media (max-width: 900px) {
-    .loan-actions-grid {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .loan-actions-grid form,
-    .loan-actions-grid a,
-    .loan-actions-grid button,
-    .loan-actions-grid input {
-        width: 100%;
-    }
-
-    .loan-actions-grid form {
-        flex-direction: column;
-        align-items: stretch;
-    }
 }
 
 /* =========================================================
@@ -2339,4 +2244,582 @@ button:disabled {
     padding: 0;
     line-height: 1.25;
     white-space: normal;
+}
+
+/* =========================================================
+   LOGIN - LINKS AUXILIARES
+   ========================================================= */
+
+.login-links {
+    margin-top: 12px;
+    text-align: center;
+}
+
+.login-help {
+    margin: 6px 0;
+}
+
+.login-help a {
+    color: #064e3b;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-help a:hover {
+    text-decoration: underline;
+}
+
+/* =========================================================
+   FORMULÁRIOS - BOTÕES SEPARADOS DOS CAMPOS
+   ========================================================= */
+
+.form-actions,
+.actions,
+.form-button-row {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Quando o formulário tiver botão direto, sem div de ações */
+.form-card > button,
+.form-card > .button {
+    margin-top: 16px;
+}
+
+/* Evita afetar filtros, tabelas e ações inline */
+.search-row button,
+.search-row .button,
+.filter-actions button,
+.filter-actions .button,
+.user-filter-actions button,
+.user-filter-actions .button,
+.approval-filter-actions button,
+.approval-filter-actions .button,
+.user-actions button,
+.user-actions .button,
+.approval-actions button,
+.approval-actions .button,
+.loan-actions-grid button,
+.loan-actions-grid .button,
+.form-actions-sticky button,
+.form-actions-sticky .button {
+    margin-top: 0;
+}
+
+/* =========================================================
+   RESPONSIVO - AÇÕES EM COLUNA NO MOBILE
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .loan-actions-grid {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .loan-actions-grid form {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .loan-actions-grid a,
+    .loan-actions-grid button,
+    .loan-actions-grid input,
+    .loan-actions-grid select {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   PADRÃO FINAL - BOTÕES E CAMPOS EM AÇÕES INLINE
+   ========================================================= */
+
+:root {
+    --control-height: 44px;
+}
+
+/* Botões padrão */
+button,
+.button,
+input[type="submit"],
+input[type="button"] {
+    min-height: var(--control-height);
+    padding: 0 14px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+    line-height: 1.2;
+    white-space: nowrap;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+
+/* Campos padrão, sem afetar textarea/file/checkbox */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select {
+    min-height: var(--control-height);
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
+/* Textarea mantém altura própria */
+textarea {
+    min-height: auto;
+}
+
+/* =========================================================
+   DETALHE DO EMPRÉSTIMO - AÇÕES DO EMPRÉSTIMO
+   ========================================================= */
+
+.loan-actions-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 18px 0 24px;
+
+    border-left: 5px solid #064e3b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.loan-actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+
+    margin-bottom: 16px;
+}
+
+.loan-actions-header h3 {
+    margin: 0 0 6px;
+}
+
+.loan-actions-header p {
+    margin: 0;
+    color: #4b5563;
+}
+
+.loan-actions-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    gap: 12px;
+    row-gap: 14px;
+}
+
+/* Cada item direto da linha de ações fica centralizado */
+.loan-actions-grid > a,
+.loan-actions-grid > button,
+.loan-actions-grid > form {
+    min-height: var(--control-height);
+    margin: 0;
+
+    display: inline-flex;
+    align-items: center;
+
+    align-self: center;
+}
+
+/* Formulários dentro das ações ficam na horizontal */
+.loan-actions-grid > form {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 8px;
+}
+
+/* Campos e botões dentro das ações têm exatamente a mesma altura */
+.loan-actions-grid a.button,
+.loan-actions-grid button,
+.loan-actions-grid input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.loan-actions-grid select {
+    height: var(--control-height);
+    min-height: var(--control-height);
+    max-height: var(--control-height);
+
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* Campos do card de ações */
+.loan-actions-grid input[type="text"] {
+    width: 280px;
+}
+
+.loan-actions-grid input[type="date"] {
+    width: 200px;
+}
+
+/* Botões não quebram linha nem crescem em altura */
+.loan-actions-grid button,
+.loan-actions-grid .button {
+    white-space: nowrap;
+    line-height: 1.2;
+}
+
+/* Botões cinza */
+.secondary-button,
+.button.secondary,
+button.secondary {
+    background: #6b7280;
+    color: white;
+}
+
+.secondary-button:hover,
+.button.secondary:hover,
+button.secondary:hover {
+    background: #4b5563;
+    color: white;
+}
+
+/* Botões de perigo */
+.danger-button {
+    background: #991b1b;
+    color: white;
+}
+
+.danger-button:hover {
+    background: #7f1d1d;
+    color: white;
+}
+
+/* =========================================================
+   BOTÕES DE FORMULÁRIO SEPARADOS DOS CAMPOS
+   ========================================================= */
+
+.form-actions,
+.actions,
+.form-button-row {
+    margin-top: 18px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.form-actions form,
+.actions form,
+.form-button-row form {
+    margin: 0;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Evita margem extra em botões de filtros e ações inline */
+.search-row button,
+.search-row .button,
+.filter-actions button,
+.filter-actions .button,
+.user-filter-actions button,
+.user-filter-actions .button,
+.approval-filter-actions button,
+.approval-filter-actions .button,
+.user-actions button,
+.user-actions .button,
+.approval-actions button,
+.approval-actions .button,
+.loan-actions-grid button,
+.loan-actions-grid .button,
+.form-actions-sticky button,
+.form-actions-sticky .button {
+    margin-top: 0;
+}
+
+/* =========================================================
+   RESPONSIVO
+   ========================================================= */
+
+@media (max-width: 900px) {
+    .loan-actions-grid {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .loan-actions-grid > a,
+    .loan-actions-grid > button,
+    .loan-actions-grid > form {
+        width: 100%;
+    }
+
+    .loan-actions-grid > form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .loan-actions-grid a.button,
+    .loan-actions-grid button,
+    .loan-actions-grid input,
+    .loan-actions-grid select {
+        width: 100%;
+    }
+
+    .form-actions,
+    .actions,
+    .form-button-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-actions button,
+    .form-actions .button,
+    .actions button,
+    .actions .button,
+    .form-button-row button,
+    .form-button-row .button {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   DETALHE DO EMPRÉSTIMO - AÇÕES EM LINHAS ALINHADAS
+   ========================================================= */
+
+:root {
+    --action-control-height: 44px;
+}
+
+.loan-actions-card {
+    background: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 18px 0 24px;
+
+    border-left: 5px solid #064e3b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.loan-actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.loan-actions-header h3 {
+    margin: 0 0 6px;
+}
+
+.loan-actions-header p {
+    margin: 0;
+    color: #4b5563;
+}
+
+.loan-actions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.loan-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
+
+.loan-action-row form {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.loan-action-row a.button,
+.loan-action-row button,
+.loan-action-row input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.loan-action-row select {
+    height: var(--action-control-height);
+    min-height: var(--action-control-height);
+    max-height: var(--action-control-height);
+
+    margin: 0;
+    box-sizing: border-box;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.loan-action-row input[type="text"] {
+    width: 280px;
+}
+
+.loan-action-row input[type="date"] {
+    width: 200px;
+}
+
+.loan-action-row button,
+.loan-action-row .button {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+@media (max-width: 900px) {
+    .loan-action-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .loan-action-row form {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .loan-action-row a.button,
+    .loan-action-row button,
+    .loan-action-row input,
+    .loan-action-row select {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   CORREÇÃO - BOTÕES DENTRO DAS AÇÕES DO EMPRÉSTIMO
+   ========================================================= */
+
+.loan-actions-card form > button[type="submit"],
+.loan-actions-card form > button[type="submit"]:last-child,
+.loan-action-row form > button[type="submit"],
+.loan-action-row form > button[type="submit"]:last-child,
+.loan-actions-grid form > button[type="submit"],
+.loan-actions-grid form > button[type="submit"]:last-child {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.loan-actions-card form,
+.loan-action-row form,
+.loan-actions-grid form {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+}
+
+.loan-actions-card button,
+.loan-actions-card .button,
+.loan-actions-card input[type="text"],
+.loan-actions-card input[type="date"] {
+    height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    box-sizing: border-box !important;
+}
+
+/* =========================================================
+   DETALHE DO EMPRÉSTIMO - AÇÕES NO CARD IDENTIFICAÇÃO
+   ========================================================= */
+
+.identification-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    margin-top: 18px;
+    padding-top: 14px;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+.identification-actions form {
+    margin: 0;
+
+    display: inline-flex;
+    align-items: center;
+}
+
+.identification-actions .button,
+.identification-actions button {
+    height: 42px;
+    min-height: 42px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    .identification-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .identification-actions .button,
+    .identification-actions button,
+    .identification-actions form {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   DETALHE DO EMPRÉSTIMO - AÇÕES NO CARD IDENTIFICAÇÃO
+   ========================================================= */
+
+.identification-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+    flex-wrap: wrap;
+
+    margin-top: 18px;
+    padding-top: 14px;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+.identification-actions form {
+    margin: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.identification-actions .button,
+.identification-actions button {
+    height: 42px;
+    min-height: 42px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    .identification-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .identification-actions .button,
+    .identification-actions button,
+    .identification-actions form {
+        width: 100%;
+    }
 }

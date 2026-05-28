@@ -24,15 +24,25 @@
         autocomplete="current-password"
     >
 
-    <button type="submit">
-        Entrar
-    </button>
+    <div class="form-button-row">
+        <button type="submit">
+            Entrar
+        </button>
+    </div>
 
-    <p class="login-help">
-        <a href="{{ url_for('auth_bp.forgot_password') }}">
-            Esqueci minha senha
-        </a>
-    </p>
+    <div class="login-links">
+        <p class="login-help">
+            <a href="{{ url_for('auth_bp.forgot_password') }}">
+                Esqueci minha senha
+            </a>
+        </p>
+
+        <p class="login-help">
+            <a href="{{ url_for('auth_bp.self_register') }}">
+                Criar cadastro de consulta
+            </a>
+        </p>
+    </div>
 
 </form>
 

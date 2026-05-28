@@ -89,6 +89,7 @@ def create_app(config_override: dict | None = None):
             "auth_bp.setup_first_admin",
             "auth_bp.forgot_password",
             "loan_bp.verify_loan_document",
+            "auth_bp.self_register",
 
             # Se ainda existir link antigo de aprovação por e-mail, deixe aqui
             # apenas se ele redirecionar para /aprovacoes/ e não aprovar direto.

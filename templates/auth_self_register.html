@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Criar cadastro</h2>
+
+<p class="hint">
+    Este cadastro cria um usuário com perfil CONSULTA. Para acesso operacional ou administrativo,
+    solicite alteração ao administrador do sistema.
+</p>
+
+<form method="post" class="form-card">
+
+    <h3>Dados pessoais</h3>
+
+    <div class="form-grid-3">
+        <div>
+            <label for="nome">Nome *</label>
+            <input
+                type="text"
+                id="nome"
+                name="nome"
+                required
+                autofocus
+            >
+        </div>
+
+        <div>
+            <label for="matricula">Matrícula</label>
+            <input
+                type="text"
+                id="matricula"
+                name="matricula"
+            >
+        </div>
+
+        <div>
+            <label for="email">E-mail *</label>
+            <input
+                type="email"
+                id="email"
+                name="email"
+                required
+            >
+        </div>
+
+        <div>
+            <label for="telefone">Telefone</label>
+            <input
+                type="text"
+                id="telefone"
+                name="telefone"
+            >
+        </div>
+
+        <div>
+            <label for="gerencia">Gerência</label>
+            <input
+                type="text"
+                id="gerencia"
+                name="gerencia"
+            >
+        </div>
+
+        <div>
+            <label for="regional">Regional</label>
+            <input
+                type="text"
+                id="regional"
+                name="regional"
+            >
+        </div>
+
+        <div>
+            <label for="equipe">Equipe</label>
+            <input
+                type="text"
+                id="equipe"
+                name="equipe"
+            >
+        </div>
+    </div>
+
+    <h3>Acesso</h3>
+
+    <div class="form-grid-2">
+        <div>
+            <label for="password">Senha *</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                minlength="6"
+            >
+        </div>
+
+        <div>
+            <label for="confirm_password">Confirmar senha *</label>
+            <input
+                type="password"
+                id="confirm_password"
+                name="confirm_password"
+                required
+                minlength="6"
+            >
+        </div>
+    </div>
+
+    <p class="hint">
+        O perfil criado será:
+        <strong>CONSULTA</strong>
+    </p>
+
+    <div class="actions">
+        <button type="submit">
+            Criar cadastro
+        </button>
+
+        <a class="button secondary" href="{{ url_for('auth_bp.login') }}">
+            Voltar ao login
+        </a>
+    </div>
+
+</form>
+
+{% endblock %}

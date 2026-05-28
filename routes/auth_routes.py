@@ -470,3 +470,53 @@ def my_profile():
         "auth_my_profile.html",
         user=user,
     )
+
+@auth_bp.route("/cadastrar", methods=["GET", "POST"])
+def self_register():
+    """
+    Cadastro público de usuário.
+
+    Usuários criados por esta tela sempre terão perfil CONSULTA.
+    """
+
+    if AuthService.count_users() == 0:
+        return redirect(url_for("auth_bp.setup_first_admin"))
+
+    if request.method == "POST":
+        try:
+            form_data = request.form.to_dict(flat=True)
+
+            password = form_data.get("password", "")
+            confirm_password = form_data.get("confirm_password", "")
+
+            if len(password) < 6:
+                raise ValueError("A senha deve ter pelo menos 6 caracteres.")
+
+            if password != confirm_password:
+                raise ValueError("A confirmação da senha não confere.")
+
+            AuthService.create_user(
+                nome=form_data.get("nome", ""),
+                email=form_data.get("email", ""),
+                password=password,
+                role=UserRole.CONSULTA.value,
+                active=True,
+                matricula=form_data.get("matricula", ""),
+                telefone=form_data.get("telefone", ""),
+                gerencia=form_data.get("gerencia", ""),
+                regional=form_data.get("regional", ""),
+                equipe=form_data.get("equipe", ""),
+            )
+
+            flash(
+                "Cadastro realizado com sucesso. Faça login para acessar o sistema.",
+                "success",
+            )
+
+            return redirect(url_for("auth_bp.login"))
+
+        except Exception as exc:
+            db.session.rollback()
+            flash(str(exc), "error")
+
+    return render_template("auth_self_register.html")
